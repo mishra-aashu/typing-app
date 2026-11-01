@@ -60,6 +60,11 @@ class TypingEngine {
 
     // Capture every keydown event
     this.hiddenInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+    // Keep cursor aligned on window resize
+    window.addEventListener('resize', () => {
+      this.updateCaretPosition();
+    });
   }
 
   async loadLesson(lesson) {
@@ -99,6 +104,11 @@ class TypingEngine {
     if (!this.textContainer) return;
     this.textContainer.innerHTML = '';
     this.charElements = [];
+
+    // Keep caret inside textContainer so offsets are always 100% relative to text
+    if (this.caret) {
+      this.textContainer.appendChild(this.caret);
+    }
 
     this.targetChars.forEach((ch, idx) => {
       const span = document.createElement('span');
@@ -302,11 +312,13 @@ class TypingEngine {
       const spanRect = span.getBoundingClientRect();
       const containerRect = this.textContainer.getBoundingClientRect();
 
-      const left = spanRect.left - containerRect.left;
-      const top = spanRect.top - containerRect.top + 2;
+      const left = spanRect.left - containerRect.left + this.textContainer.scrollLeft;
+      const top = spanRect.top - containerRect.top + this.textContainer.scrollTop;
+      const height = spanRect.height;
 
       this.caret.style.left = `${left}px`;
-      this.caret.style.top = `${top}px`;
+      this.caret.style.top = `${top + (height * 0.12)}px`;
+      this.caret.style.height = `${height * 0.76}px`;
       this.caret.style.display = 'block';
     } else if (this.charElements.length > 0) {
       // Past the last character
@@ -314,11 +326,13 @@ class TypingEngine {
       const spanRect = lastSpan.getBoundingClientRect();
       const containerRect = this.textContainer.getBoundingClientRect();
 
-      const left = spanRect.right - containerRect.left;
-      const top = spanRect.top - containerRect.top + 2;
+      const left = spanRect.right - containerRect.left + this.textContainer.scrollLeft;
+      const top = spanRect.top - containerRect.top + this.textContainer.scrollTop;
+      const height = spanRect.height;
 
       this.caret.style.left = `${left}px`;
-      this.caret.style.top = `${top}px`;
+      this.caret.style.top = `${top + (height * 0.12)}px`;
+      this.caret.style.height = `${height * 0.76}px`;
       this.caret.style.display = 'block';
     }
   }

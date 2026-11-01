@@ -438,7 +438,7 @@ html, body {
 .caret {
   position: absolute;
   width: 3px;
-  height: 2.1rem;
+  min-height: 24px;
   background-color: var(--color-cursor);
   box-shadow: 0 0 12px var(--color-cursor-glow);
   border-radius: 2px;
