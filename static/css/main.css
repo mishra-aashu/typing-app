@@ -233,60 +233,169 @@ html, body {
    Sub-Header: Mode & Lesson Selector Tabs
    ========================================================================== */
 
-.modes-bar {
-  position: relative;
-  z-index: 500;
+/* ==========================================================================
+   Multi-View Layout: Stage Selection Dashboard vs Focused Typing Arena
+   ========================================================================== */
+
+.view-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  animation: fadeInView 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInView {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* VIEW 1: Dashboard Tier Bar */
+.dashboard-tier-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 1rem;
-  padding: 0.75rem 1.25rem;
   background: var(--bg-glass);
   border: 1px solid var(--bg-glass-border);
+  padding: 0.75rem 1.25rem;
   border-radius: var(--radius-md);
 }
 
-.difficulty-tabs {
+.tier-overview-banner {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 2rem;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.4rem;
-  background: rgba(0, 0, 0, 0.25);
-  padding: 0.35rem;
-  border-radius: var(--radius-md);
-  overflow-x: auto;
+  gap: 2rem;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-card);
 }
 
-.tab-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.12);
-  margin: 0 0.2rem;
-  flex-shrink: 0;
+.tier-overview-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
-
-.diff-tab {
-  background: transparent;
-  border: none;
+.dashboard-tier-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.dashboard-tier-desc {
+  font-size: 0.95rem;
   color: var(--text-dim);
-  padding: 0.5rem 0.95rem;
-  border-radius: var(--radius-sm);
+}
+
+.tier-overview-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 260px;
+}
+.tier-stats-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-smooth);
+}
+.tier-progress-text {
+  font-weight: 700;
+  color: var(--text-highlight);
+}
+
+.stages-dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* VIEW 2: Dedicated Typing Arena Nav Bar */
+.arena-top-bar {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-glass-border);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.5rem;
+  box-shadow: var(--shadow-card);
 }
-.diff-tab:hover {
+
+.arena-back-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bg-glass-border);
   color: var(--text-main);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition-smooth);
 }
-.diff-tab.active {
+.arena-back-btn:hover {
   background: var(--accent-primary);
+  border-color: var(--accent-primary);
   color: #fff;
   box-shadow: var(--shadow-glow);
+  transform: translateX(-2px);
+}
+
+.arena-stage-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.arena-phase-tag {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  background: rgba(0, 240, 255, 0.12);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.arena-stage-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.arena-target-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.arena-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.arena-counter-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 /* ==========================================================================
