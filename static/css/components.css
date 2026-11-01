@@ -198,33 +198,37 @@
 }
 
 .btn-primary {
-  background: var(--accent-gradient);
-  border: none;
-  color: #fff;
-  padding: 0.75rem 1.75rem;
+  background: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff !important;
+  padding: 0.75rem 1.6rem;
   border-radius: var(--radius-md);
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.4);
   transition: var(--transition-smooth);
 }
 .btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 50%, #0891b2 100%);
+  box-shadow: 0 6px 24px rgba(6, 182, 212, 0.55);
   transform: translateY(-2px);
-  filter: brightness(1.1);
+}
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
-  background: var(--bg-secondary);
-  border: 1px solid var(--bg-glass-border);
-  color: var(--text-main);
-  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 0.75rem 1.4rem;
   border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -232,8 +236,34 @@
   transition: var(--transition-smooth);
 }
 .btn-secondary:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+#resultsRepeatBtn {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+#resultsRepeatBtn:hover {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #070913;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.45);
+}
+
+#resultsBackToStagesBtn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+#resultsBackToStagesBtn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.25);
 }
 
 /* ==========================================================================
@@ -513,54 +543,69 @@
 }
 
 .stage-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--bg-glass-border);
+  background: rgba(13, 17, 36, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 1.15rem;
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.95rem;
   transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
 }
-.stage-card:hover {
+
+/* Unlocked / Ready Card State */
+.stage-card:not(.locked):not(.passed) {
+  background: linear-gradient(180deg, rgba(28, 34, 68, 0.75) 0%, rgba(13, 17, 36, 0.88) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(99, 102, 241, 0.12);
+}
+.stage-card:not(.locked):not(.passed):hover {
+  border-color: rgba(99, 102, 241, 0.75);
+  box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.7), 0 0 25px rgba(99, 102, 241, 0.25);
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.2);
 }
-.stage-card.current {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 15px rgba(121, 82, 255, 0.25);
-}
+
+/* Passed / Completed Card State */
 .stage-card.passed {
-  border-color: rgba(16, 185, 129, 0.35);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, rgba(13, 17, 36, 0.88) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 185, 129, 0.1);
 }
+.stage-card.passed:hover {
+  border-color: rgba(16, 185, 129, 0.65);
+  box-shadow: 0 14px 30px -8px rgba(0, 0, 0, 0.7), 0 0 25px rgba(16, 185, 129, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Locked Card State */
 .stage-card.locked {
-  opacity: 1; /* 100% readable - no fading out */
-  filter: none;
-  background: rgba(22, 26, 42, 0.75);
-  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(11, 15, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .stage-card.locked:hover {
-  border-color: rgba(245, 158, 11, 0.4);
-  transform: translateY(-2px);
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(15, 20, 40, 0.75);
+  transform: translateY(-1px);
 }
 
 .stage-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
 .stage-card-title {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #ffffff !important;
   line-height: 1.35;
+  letter-spacing: -0.01em;
 }
 .stage-card-desc {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: #94a3b8;
   line-height: 1.45;
 }
@@ -570,26 +615,35 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding-top: 0.6rem;
+  padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 .target-wpm-chip {
-  color: #cbd5e1;
+  color: #94a3b8;
   font-weight: 600;
 }
 .target-wpm-chip strong {
-  color: #fff;
+  color: #38bdf8;
+  font-weight: 700;
 }
+
+/* Distinct Status Badges */
 .stage-status-chip {
   font-weight: 700;
   padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.8rem;
-  letter-spacing: 0.02em;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.stage-status-chip.unlocked {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  color: #c7d2fe;
 }
 .stage-status-chip.passed {
   background: rgba(16, 185, 129, 0.18);
@@ -597,47 +651,83 @@
   color: #34d399;
 }
 .stage-status-chip.locked {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.4);
   color: #fbbf24;
 }
-.stage-status-chip.unlocked {
-  background: rgba(121, 82, 255, 0.2);
-  border: 1px solid rgba(121, 82, 255, 0.45);
-  color: #c4b5fd;
-}
+
+/* ==========================================================================
+   Stage Play Buttons Hierarchy (Primary, Repeat, Locked)
+   ========================================================================== */
 
 .stage-play-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--bg-glass-border);
-  color: #fff;
-  padding: 0.55rem 0.95rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  transition: var(--transition-smooth);
-  width: 100%;
-}
-.stage-play-btn:hover {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 15px var(--accent-glow);
-}
-.stage-play-btn.locked {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #94a3b8;
+  gap: 0.5rem;
   cursor: pointer;
+  transition: var(--transition-smooth);
 }
+
+/* 1. HERO CTA: Start Stage (Vibrant Indigo-to-Cyan Electric Gradient) */
+.stage-play-btn.btn-start,
+.stage-play-btn:not(.btn-repeat):not(.btn-locked):not(.locked) {
+  background: linear-gradient(135deg, #6366f1 0%, #3b82f6 50%, #06b6d4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.4);
+  letter-spacing: 0.02em;
+}
+.stage-play-btn.btn-start:hover,
+.stage-play-btn:not(.btn-repeat):not(.btn-locked):not(.locked):hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #2563eb 50%, #0891b2 100%);
+  box-shadow: 0 6px 24px rgba(6, 182, 212, 0.55);
+  transform: translateY(-2px);
+}
+.stage-play-btn.btn-start:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4);
+}
+
+/* 2. SECONDARY CTA: Practice Again (Clean Emerald / Mint) */
+.stage-play-btn.btn-repeat {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399 !important;
+}
+.stage-play-btn.btn-repeat:hover {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff !important;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.45);
+  transform: translateY(-2px);
+}
+.stage-play-btn.btn-repeat:active {
+  transform: translateY(0);
+}
+
+/* 3. DISABLED / LOCKED BUTTON */
+.stage-play-btn.btn-locked,
+.stage-play-btn.locked {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  color: #64748b !important;
+  font-weight: 600;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.stage-play-btn.btn-locked:hover,
 .stage-play-btn.locked:hover {
-  background: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24 !important;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Celebration Banner */

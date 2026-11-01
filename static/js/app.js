@@ -351,19 +351,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Action CTA button
         let buttonHtml = '';
+        let buttonClass = 'stage-play-btn';
         if (isDone) {
+          buttonClass += ' btn-repeat';
           buttonHtml = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             <span>Practice Again</span>
           `;
-        } else if (isUnlocked) {
+        } else if (isUnlocked || lessonMgr.freePlayMode) {
+          buttonClass += ' btn-start';
           buttonHtml = `
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
             <span>Start Stage &rarr;</span>
           `;
         } else {
+          buttonClass += ' btn-locked';
           buttonHtml = `
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span>Locked &bull; Complete Previous</span>
           `;
         }
@@ -378,7 +382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span class="target-wpm-chip">Target: <strong>${Math.round(l.min_target_wpm)} WPM</strong></span>
             <span class="target-wpm-chip">Accuracy: <strong>${Math.round(l.min_accuracy)}%</strong></span>
           </div>
-          <button class="stage-play-btn ${!isUnlocked ? 'locked' : ''}" type="button">
+          <button class="${buttonClass}" type="button">
             ${buttonHtml}
           </button>
         `;
