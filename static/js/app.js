@@ -110,13 +110,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateLessonDropdown();
     }
 
-    // Refresh stats in background and apply updated heatmap to keyboard
+    // Refresh stats in background
     const updatedStats = await statsMgr.fetchStats();
     if (updatedStats) {
       lessonMgr.syncProgress(updatedStats);
-      if (updatedStats.key_error_heatmap) {
-        keyboard.applyHeatmap(updatedStats.key_error_heatmap);
-      }
     }
   });
 
@@ -292,9 +289,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const initialStats = await statsMgr.fetchStats();
   if (initialStats) {
     lessonMgr.syncProgress(initialStats);
-    if (initialStats.key_error_heatmap) {
-      keyboard.applyHeatmap(initialStats.key_error_heatmap);
-    }
   }
 
   // 3. Automatically resume at the next incomplete lesson

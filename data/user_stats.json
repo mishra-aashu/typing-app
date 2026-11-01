@@ -9,17 +9,19 @@
   "completed_lesson_ids": [
     "beg-06-common-words-100"
   ],
+  "lesson_progress": {},
+  "last_active_lesson_id": "beg-01-home-row-1",
   "key_error_heatmap": {
-    "a": 4,
-    "u": 6,
-    " ": 6,
-    "t": 2,
-    "b": 2,
-    "o": 6,
     "e": 2,
-    "f": 2,
     "n": 2,
-    "y": 4
+    "f": 2,
+    "b": 2,
+    "y": 4,
+    "u": 6,
+    "t": 2,
+    "a": 4,
+    "o": 6,
+    " ": 6
   },
   "achievements": [
     {

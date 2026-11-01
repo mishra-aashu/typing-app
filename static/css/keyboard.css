@@ -1,5 +1,6 @@
 /* ==========================================================================
-   TypeForge - Interactive Mechanical Keyboard Visualizer
+   TypeForge - Sleek Mechanical Keyboard Visualizer
+   Clean, uniform, minimal aesthetics.
    ========================================================================== */
 
 .keyboard-container {
@@ -23,41 +24,15 @@
 }
 
 .keyboard-title {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-
-.finger-guide-legend {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.finger-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 0.25rem;
-}
-
-.finger-left-pinky   { background-color: #ef4444; }
-.finger-left-ring     { background-color: #f97316; }
-.finger-left-middle   { background-color: #eab308; }
-.finger-left-index    { background-color: #10b981; }
-.finger-right-index   { background-color: #06b6d4; }
-.finger-right-middle  { background-color: #3b82f6; }
-.finger-right-ring    { background-color: #8b5cf6; }
-.finger-right-pinky   { background-color: #ec4899; }
-.finger-thumb         { background-color: #64748b; }
 
 /* Keyboard Rows */
 .kb-row {
@@ -83,7 +58,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--key-shadow);
-  transition: transform 0.06s ease, background 0.08s ease, box-shadow 0.06s ease, color 0.08s ease;
+  transition: transform 0.06s ease, background 0.08s ease, box-shadow 0.06s ease, color 0.08s ease, border-color 0.08s ease;
   user-select: none;
 }
 
@@ -107,59 +82,28 @@
 .key-enter     { min-width: 92px; font-size: 0.75rem; }
 .key-backspace { min-width: 82px; font-size: 0.75rem; }
 .key-space     { min-width: 290px; }
-.key-ctrl, .key-alt, .key-cmd { min-width: 58px; font-size: 0.75rem; }
+.key-ctrl, .key-alt { min-width: 58px; font-size: 0.75rem; }
 
 /* Active Key Press Effect (Mechanical Depress) */
 .key.pressed {
   transform: translateY(3px);
   box-shadow: var(--key-active-shadow);
-  background: var(--key-active-bg) !important;
+  background: var(--accent-primary) !important;
   color: #fff !important;
-  border-color: #fff !important;
+  border-color: var(--accent-primary) !important;
 }
 
-/* Target Key Pulse (Next key you should press) */
+/* Target Key Guide (Next key to press) */
 .key.target-key {
-  border-color: var(--color-cursor);
-  box-shadow: 0 0 15px var(--color-cursor-glow), var(--key-shadow);
+  border-color: var(--accent-primary);
+  background: var(--bg-card-hover);
   color: var(--text-highlight);
-  animation: keyPulse 1.2s infinite alternate ease-in-out;
-}
-
-@keyframes keyPulse {
-  0% { transform: translateY(0); border-color: var(--color-cursor); }
-  100% { transform: translateY(-2px); border-color: #fff; box-shadow: 0 0 20px var(--color-cursor-glow), var(--key-shadow); }
-}
-
-/* Finger Zone Colored Tops */
-.key[data-finger="lp"] { border-top: 2px solid #ef4444; }
-.key[data-finger="lr"] { border-top: 2px solid #f97316; }
-.key[data-finger="lm"] { border-top: 2px solid #eab308; }
-.key[data-finger="li"] { border-top: 2px solid #10b981; }
-.key[data-finger="ri"] { border-top: 2px solid #06b6d4; }
-.key[data-finger="rm"] { border-top: 2px solid #3b82f6; }
-.key[data-finger="rr"] { border-top: 2px solid #8b5cf6; }
-.key[data-finger="rp"] { border-top: 2px solid #ec4899; }
-.key[data-finger="th"] { border-top: 2px solid #64748b; }
-
-/* Weak Keys Heatmap Density Overlay */
-.key.heat-low {
-  background: rgba(245, 158, 11, 0.25) !important;
-  border-color: #f59e0b !important;
-}
-.key.heat-medium {
-  background: rgba(249, 115, 22, 0.4) !important;
-  border-color: #f97316 !important;
-}
-.key.heat-high {
-  background: rgba(239, 68, 68, 0.6) !important;
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 0 14px var(--accent-glow), var(--key-shadow);
 }
 
 /* Responsive Keyboard */
 @media (max-width: 900px) {
   .keyboard-container {
-    display: none; /* Hide on small viewports to preserve screen space */
+    display: none;
   }
 }
