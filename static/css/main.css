@@ -234,6 +234,8 @@ html, body {
    ========================================================================== */
 
 .modes-bar {
+  position: relative;
+  z-index: 500;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -241,7 +243,6 @@ html, body {
   gap: 1rem;
   padding: 0.75rem 1.25rem;
   background: var(--bg-glass);
-  backdrop-filter: blur(12px);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-md);
 }
@@ -320,6 +321,7 @@ html, body {
 
 .custom-lesson-picker {
   position: relative;
+  z-index: 600;
 }
 
 .lesson-picker-trigger {
@@ -545,6 +547,8 @@ html, body {
    ========================================================================== */
 
 .metrics-hud {
+  position: relative;
+  z-index: 10;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
@@ -622,6 +626,7 @@ html, body {
 
 .stage-wrapper {
   position: relative;
+  z-index: 5;
   background: var(--bg-card);
   border: 1px solid var(--bg-glass-border);
   border-radius: var(--radius-lg);
