@@ -26,7 +26,7 @@
       "id": "first_test",
       "title": "First Keystrokes",
       "description": "Completed your first typing session.",
-      "icon": "⚡",
+      "icon": "zap",
       "unlocked": true,
       "unlocked_at": "2026-11-01T08:48:20.969696800+00:00"
     },
@@ -34,7 +34,7 @@
       "id": "speed_40",
       "title": "Rapid Flow (40 WPM)",
       "description": "Surpassed 40 Words Per Minute with high accuracy.",
-      "icon": "🚀",
+      "icon": "rocket",
       "unlocked": false,
       "unlocked_at": null
     },
@@ -42,7 +42,7 @@
       "id": "speed_60",
       "title": "Velocity Master (60 WPM)",
       "description": "Crossed the 60 WPM threshold — touch typing pro.",
-      "icon": "🔥",
+      "icon": "flame",
       "unlocked": false,
       "unlocked_at": null
     },
@@ -50,7 +50,7 @@
       "id": "speed_100",
       "title": "Century Club (100 WPM)",
       "description": "Lightning fingertips: reached triple-digit WPM!",
-      "icon": "👑",
+      "icon": "crown",
       "unlocked": false,
       "unlocked_at": null
     },
@@ -58,7 +58,7 @@
       "id": "flawless_100",
       "title": "Laser Precision (100%)",
       "description": "Finished a complete lesson with 100% accuracy without errors.",
-      "icon": "🎯",
+      "icon": "target",
       "unlocked": false,
       "unlocked_at": null
     },
@@ -66,7 +66,7 @@
       "id": "expert_coder",
       "title": "Silicon Scribe",
       "description": "Conquered an Expert level programming language test.",
-      "icon": "💻",
+      "icon": "code",
       "unlocked": false,
       "unlocked_at": null
     },
@@ -74,7 +74,7 @@
       "id": "consistency_star",
       "title": "Metronome Rhythm",
       "description": "Achieved >95% typing cadence consistency.",
-      "icon": "🎵",
+      "icon": "music",
       "unlocked": false,
       "unlocked_at": null
     }
