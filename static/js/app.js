@@ -1,17 +1,35 @@
 /**
  * TypeForge - Master Application Controller
- * High-velocity touch typing tutor with 68 structured stages across 5 difficulty tiers.
- * Features custom glass stage stepper, stage map drawer, milestone celebrations, and persistence.
+ * Multi-View Touch Typing Tutor Architecture:
+ * - View 1: Stage & Curriculum Selection Dashboard (Browse levels, stages, progress, and targets)
+ * - View 2: Focused Distraction-Free Typing Arena (Real-time HUD, character stream, mechanical sounds, live visual keyboard)
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Elements
-  const typingDisplay = document.getElementById('typingDisplay');
-  const caret = document.getElementById('caret');
-  const hiddenInput = document.getElementById('hiddenInput');
-  const keyboardContainer = document.getElementById('keyboardContainer');
+  // Primary View Panels
+  const curriculumView = document.getElementById('curriculumView');
+  const typingArenaView = document.getElementById('typingArenaView');
 
-  // HUD Elements
+  // View 1 (Dashboard) Elements
+  const difficultyTabs = document.querySelectorAll('.diff-tab');
+  const dashboardTierTitle = document.getElementById('dashboardTierTitle');
+  const dashboardTierDesc = document.getElementById('dashboardTierDesc');
+  const dashboardTierPercent = document.getElementById('dashboardTierPercent');
+  const dashboardTierBar = document.getElementById('dashboardTierBar');
+  const dashboardStagesContainer = document.getElementById('dashboardStagesContainer');
+  const freePlayCheckbox = document.getElementById('freePlayCheckbox');
+  const stagesCompletedBadge = document.getElementById('stagesCompletedBadge');
+
+  // View 2 (Typing Arena) Elements
+  const arenaBackBtn = document.getElementById('arenaBackBtn');
+  const arenaPhaseTag = document.getElementById('arenaPhaseTag');
+  const arenaStageName = document.getElementById('arenaStageName');
+  const arenaTargetTag = document.getElementById('arenaTargetTag');
+  const arenaPrevBtn = document.getElementById('arenaPrevBtn');
+  const arenaCounterBadge = document.getElementById('arenaCounterBadge');
+  const arenaNextBtn = document.getElementById('arenaNextBtn');
+
+  // Live Performance HUD Elements
   const liveWpmVal = document.getElementById('liveWpmVal');
   const liveAccVal = document.getElementById('liveAccVal');
   const liveTimeVal = document.getElementById('liveTimeVal');
@@ -19,44 +37,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   const lessonMetaTitle = document.getElementById('lessonMetaTitle');
   const lessonMetaDesc = document.getElementById('lessonMetaDesc');
 
-  // Controls & Navigation
-  const difficultyTabs = document.querySelectorAll('.diff-tab');
+  // Core Typing Display & Caret
+  const typingDisplay = document.getElementById('typingDisplay');
+  const caret = document.getElementById('caret');
+  const hiddenInput = document.getElementById('hiddenInput');
   const restartBtn = document.getElementById('restartBtn');
+
+  // Header Controls
   const themeSelect = document.getElementById('themeSelect');
   const switchSelect = document.getElementById('switchSelect');
   const toggleKbBtn = document.getElementById('toggleKbBtn');
   const customTextBtn = document.getElementById('customTextBtn');
   const statsModalBtn = document.getElementById('statsModalBtn');
-  const stagesMapBtn = document.getElementById('stagesMapBtn');
-  const stagesCompletedBadge = document.getElementById('stagesCompletedBadge');
-
-  // Custom Lesson Stepper & Picker Elements
-  const prevLessonBtn = document.getElementById('prevLessonBtn');
-  const nextLessonBtn = document.getElementById('nextLessonBtn');
-  const customLessonPicker = document.getElementById('customLessonPicker');
-  const lessonPickerTrigger = document.getElementById('lessonPickerTrigger');
-  const lessonPickerMenu = document.getElementById('lessonPickerMenu');
-  const pickerPhaseLabel = document.getElementById('pickerPhaseLabel');
-  const pickerTitleLabel = document.getElementById('pickerTitleLabel');
-  const pickerTargetLabel = document.getElementById('pickerTargetLabel');
 
   // Modals
   const resultsModal = document.getElementById('resultsModal');
-  const customTextModal = document.getElementById('customTextModal');
-  const statsModal = document.getElementById('statsModal');
-  const stagesModal = document.getElementById('stagesModal');
+  const resultsRepeatBtn = document.getElementById('resultsRepeatBtn');
+  const resultsNextBtn = document.getElementById('resultsNextBtn');
+  const resultsBackToStagesBtn = document.getElementById('resultsBackToStagesBtn');
   const resultsCelebrationBanner = document.getElementById('resultsCelebrationBanner');
 
-  // Stages Modal Elements
-  const totalCurriculumProgress = document.getElementById('totalCurriculumProgress');
-  const freePlayCheckbox = document.getElementById('freePlayCheckbox');
-  const stagesTierNav = document.getElementById('stagesTierNav');
-  const tierProgressTitle = document.getElementById('tierProgressTitle');
-  const tierProgressPercent = document.getElementById('tierProgressPercent');
-  const tierProgressBar = document.getElementById('tierProgressBar');
-  const stagesListContainer = document.getElementById('stagesListContainer');
+  const customTextModal = document.getElementById('customTextModal');
+  const statsModal = document.getElementById('statsModal');
 
-  let activeModalTier = 'beginner';
+  let activeTier = 'beginner';
+  let currentActiveLesson = null;
 
   // 1. Initialize Visual Keyboard
   const keyboard = new VisualKeyboard('keyboardContainer');
@@ -78,224 +83,411 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Handle live metric updates on HUD
   engine.onMetricsUpdate(metrics => {
-    liveWpmVal.textContent = Math.round(metrics.netWpm);
-    liveAccVal.textContent = `${Math.round(metrics.accuracy)}%`;
-    liveTimeVal.textContent = `${metrics.elapsedSec.toFixed(1)}s`;
-    liveErrVal.textContent = metrics.errorCount;
+    if (liveWpmVal) liveWpmVal.textContent = Math.round(metrics.netWpm);
+    if (liveAccVal) liveAccVal.textContent = `${Math.round(metrics.accuracy)}%`;
+    if (liveTimeVal) liveTimeVal.textContent = `${metrics.elapsedSec.toFixed(1)}s`;
+    if (liveErrVal) liveErrVal.textContent = metrics.errorCount;
   });
 
-  // Update curriculum summary badges across header & modal
+  // Tier metadata descriptions
+  const tierInfo = {
+    beginner: {
+      title: 'Level 1: Beginner Mastery',
+      desc: 'Master home row index anchor keys, reaches, and baseline speed from 20 to 40 WPM.',
+    },
+    medium: {
+      title: 'Level 2: Intermediate Cadence',
+      desc: 'Build speed with capital letters, numbers, punctuation, and common English word flow from 45 to 65 WPM.',
+    },
+    advanced: {
+      title: 'Level 3: Advanced Web & Syntax',
+      desc: 'Navigate HTML/CSS tags, CamelCase variables, brackets, and clean syntax from 70 to 85 WPM.',
+    },
+    expert: {
+      title: 'Level 4: Expert Code & Century Club',
+      desc: 'High-speed algorithmic patterns, nested logic, and 90 to 100 WPM velocity trials.',
+    },
+    legend: {
+      title: 'Level 5: Legend Apex Trials',
+      desc: 'Apex speed sprints, complex symbols, and peak performance from 110 to 120+ WPM.',
+    },
+    dynamic: {
+      title: 'Random 25 Sprint',
+      desc: 'Quick 25-word speed drills dynamically generated to sharpen cadence and reflex.',
+    },
+    weak_keys: {
+      title: 'Weak Keys Targeted Drill',
+      desc: 'Intelligent repetition focusing on your most frequent keystroke errors.',
+    },
+  };
+
+  // Update curriculum summary badges across tabs and header
   function updateCurriculumSummary() {
     const all = lessonMgr.getAllLessonsFlat();
     const completedCount = all.filter(l => lessonMgr.isLessonCompleted(l.id)).length;
     const totalCount = all.length;
 
     if (stagesCompletedBadge) {
-      stagesCompletedBadge.textContent = `${completedCount}/${totalCount}`;
-    }
-    if (totalCurriculumProgress) {
-      totalCurriculumProgress.textContent = `${completedCount} of ${totalCount} Passed`;
+      stagesCompletedBadge.textContent = `${completedCount}/${totalCount} Passed`;
     }
 
-    // Update counts for each tier pill in modal
-    ['beginner', 'medium', 'advanced', 'expert', 'legend'].forEach(tier => {
-      const stats = lessonMgr.getTierStats(tier);
-      const el = document.getElementById(`count-${tier}`);
+    ['beginner', 'medium', 'advanced', 'expert', 'legend'].forEach(t => {
+      const stats = lessonMgr.getTierStats(t);
+      const el = document.getElementById(`badge-${t}`);
       if (el) el.textContent = `${stats.completed}/${stats.total}`;
     });
   }
 
-  // Populate Custom Lesson Picker Trigger & Floating Menu
-  function updateLessonPickerUI() {
-    const active = lessonMgr.activeLesson;
-    if (!active) return;
+  // =========================================================================
+  // VIEW SWITCHING CONTROLLER
+  // =========================================================================
 
-    // Update trigger labels
-    if (pickerPhaseLabel) pickerPhaseLabel.textContent = active.category || 'Curriculum';
-    if (pickerTitleLabel) pickerTitleLabel.textContent = active.title;
-    if (pickerTargetLabel) pickerTargetLabel.textContent = `${Math.round(active.min_target_wpm)} WPM`;
-
-    // Populate custom floating menu
-    if (lessonPickerMenu) {
-      lessonPickerMenu.innerHTML = '';
-      const diff = lessonMgr.currentDifficulty;
-      const groups = lessonMgr.getLessonsGroupedByPhase(diff);
-
-      // Top Header inside menu
-      const menuTop = document.createElement('div');
-      menuTop.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.75rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:0.4rem;';
-      menuTop.innerHTML = `
-        <span style="font-size:0.8rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:0.05em;">Select Stage</span>
-        <button id="pickerOpenModalBtn" type="button" style="background:transparent; border:none; color:var(--accent-primary); font-size:0.78rem; font-weight:700; cursor:pointer; padding:0.2rem 0.4rem;">View Full Map &rarr;</button>
-      `;
-      menuTop.querySelector('#pickerOpenModalBtn').addEventListener('click', e => {
-        e.stopPropagation();
-        closePickerMenu();
-        const currentTier = ['beginner', 'medium', 'advanced', 'expert', 'legend'].includes(lessonMgr.currentDifficulty)
-          ? lessonMgr.currentDifficulty
-          : 'beginner';
-        renderStagesModal(currentTier);
-        openModal(stagesModal);
-      });
-      lessonPickerMenu.appendChild(menuTop);
-
-      Object.entries(groups).forEach(([phaseName, phaseLessons]) => {
-        const headerEl = document.createElement('div');
-        headerEl.className = 'picker-menu-phase-header';
-        headerEl.textContent = phaseName;
-        lessonPickerMenu.appendChild(headerEl);
-
-        phaseLessons.forEach(l => {
-          const isDone = lessonMgr.isLessonCompleted(l.id);
-          const isUnlocked = lessonMgr.isLessonUnlocked(l.id);
-          const prog = lessonMgr.getLessonProgress(l.id);
-          const isCurrent = active && active.id === l.id;
-
-          const itemEl = document.createElement('div');
-          itemEl.className = `picker-menu-item ${isCurrent ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`;
-
-          let statusIconHtml = '';
-          if (isDone) {
-            statusIconHtml = `
-              <span class="picker-item-status-icon passed">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </span>`;
-          } else if (!isUnlocked) {
-            statusIconHtml = `
-              <span class="picker-item-status-icon locked" style="color:var(--text-muted);">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-              </span>`;
-          } else {
-            statusIconHtml = `<span class="picker-item-status-icon dot"></span>`;
-          }
-
-          let rightBadgeHtml = '';
-          if (isDone && prog?.best_wpm) {
-            rightBadgeHtml = `<span class="picker-item-best">${Math.round(prog.best_wpm)} WPM</span>`;
-          } else {
-            rightBadgeHtml = `<span class="picker-item-target">${Math.round(l.min_target_wpm)} WPM</span>`;
-          }
-
-          itemEl.innerHTML = `
-            <div class="picker-item-left">
-              ${statusIconHtml}
-              <span class="picker-item-name">${l.title}</span>
-            </div>
-            <div class="picker-item-right">
-              ${rightBadgeHtml}
-            </div>
-          `;
-
-          itemEl.addEventListener('click', e => {
-            e.stopPropagation();
-            if (isUnlocked || isDone || lessonMgr.freePlayMode) {
-              lessonMgr.selectLesson(l);
-              closePickerMenu();
-            } else {
-              // Notify user cleanly without raw emojis
-              showToast('Pass previous stage to unlock this lesson.');
-            }
-          });
-
-          lessonPickerMenu.appendChild(itemEl);
-        });
-      });
+  /**
+   * Switch to View 1: Stage Selection Dashboard
+   */
+  function showCurriculumView(tier) {
+    if (tier && tierInfo[tier]) {
+      activeTier = tier;
     }
 
+    // Toggle View Panels
+    if (curriculumView) {
+      curriculumView.style.display = 'flex';
+      curriculumView.classList.add('active');
+    }
+    if (typingArenaView) {
+      typingArenaView.style.display = 'none';
+      typingArenaView.classList.remove('active');
+    }
+
+    // Update Difficulty Tabs
+    difficultyTabs.forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.diff === activeTier);
+    });
+
+    renderDashboardStages(activeTier);
     updateCurriculumSummary();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Toggle Custom Lesson Picker Dropdown
-  function togglePickerMenu() {
-    const isShowing = lessonPickerMenu.classList.contains('show');
-    if (isShowing) {
-      closePickerMenu();
-    } else {
-      openPickerMenu();
+  /**
+   * Switch to View 2: Focused Typing Arena
+   */
+  function showTypingArena(lesson) {
+    if (!lesson) return;
+    currentActiveLesson = lesson;
+    lessonMgr.selectLesson(lesson);
+
+    // Toggle View Panels
+    if (curriculumView) {
+      curriculumView.style.display = 'none';
+      curriculumView.classList.remove('active');
     }
+    if (typingArenaView) {
+      typingArenaView.style.display = 'flex';
+      typingArenaView.classList.add('active');
+    }
+
+    // Update Arena Navigation Header
+    const isDone = lessonMgr.isLessonCompleted(lesson.id);
+    const prog = lessonMgr.getLessonProgress(lesson.id);
+
+    if (arenaPhaseTag) {
+      arenaPhaseTag.textContent = lesson.category || 'Stage';
+    }
+    if (arenaStageName) {
+      arenaStageName.textContent = lesson.title;
+    }
+    if (arenaTargetTag) {
+      if (isDone && prog?.best_wpm) {
+        arenaTargetTag.innerHTML = `Best: <strong>${Math.round(prog.best_wpm)} WPM</strong>`;
+        arenaTargetTag.style.color = '#34d399';
+        arenaTargetTag.style.background = 'rgba(16, 185, 129, 0.15)';
+      } else {
+        arenaTargetTag.innerHTML = `Target: <strong>${Math.round(lesson.min_target_wpm)} WPM</strong>`;
+        arenaTargetTag.style.color = '#38bdf8';
+        arenaTargetTag.style.background = 'rgba(56, 189, 248, 0.12)';
+      }
+    }
+
+    // Update Counter Badge (Stage X / Y)
+    const tierList = lessonMgr.getLessonsForDifficulty(lesson.difficulty);
+    const currentIdx = tierList.findIndex(l => l.id === lesson.id);
+    if (arenaCounterBadge) {
+      if (currentIdx !== -1) {
+        arenaCounterBadge.textContent = `${currentIdx + 1} / ${tierList.length}`;
+      } else {
+        arenaCounterBadge.textContent = `Practice Drill`;
+      }
+    }
+
+    // Update Stage Metadata
+    if (lessonMetaTitle) {
+      const statusPill = isDone
+        ? ` <span style="color:#10b981; font-size:0.8rem; margin-left:8px;">[Passed: ${prog ? Math.round(prog.best_wpm) + ' WPM' : 'Complete'}]</span>`
+        : ` <span style="color:var(--text-muted); font-size:0.8rem; margin-left:8px;">[Target: ${Math.round(lesson.min_target_wpm)} WPM]</span>`;
+      lessonMetaTitle.innerHTML = `<span>${lesson.category || 'Curriculum'}</span> — ${lesson.title}${statusPill}`;
+    }
+    if (lessonMetaDesc) {
+      lessonMetaDesc.textContent = lesson.description || '';
+    }
+
+    // Load into engine & focus
+    engine.loadLesson(lesson);
+    setTimeout(() => {
+      if (hiddenInput) hiddenInput.focus();
+    }, 50);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function openPickerMenu() {
-    lessonPickerMenu.classList.add('show');
-    lessonPickerTrigger.classList.add('active');
-  }
+  // =========================================================================
+  // DASHBOARD STAGES RENDERER (VIEW 1)
+  // =========================================================================
 
-  function closePickerMenu() {
-    lessonPickerMenu.classList.remove('show');
-    lessonPickerTrigger.classList.remove('active');
-  }
+  function renderDashboardStages(tier) {
+    if (!dashboardStagesContainer) return;
 
-  if (lessonPickerTrigger) {
-    lessonPickerTrigger.addEventListener('click', e => {
-      e.stopPropagation();
-      togglePickerMenu();
+    const info = tierInfo[tier] || tierInfo.beginner;
+    if (dashboardTierTitle) dashboardTierTitle.textContent = info.title;
+    if (dashboardTierDesc) dashboardTierDesc.textContent = info.desc;
+
+    dashboardStagesContainer.innerHTML = '';
+
+    // Handle Quick Practice Modes (Random 25 / Weak Keys)
+    if (tier === 'dynamic' || tier === 'weak_keys') {
+      if (dashboardTierPercent) dashboardTierPercent.textContent = 'Infinite Practice';
+      if (dashboardTierBar) dashboardTierBar.style.width = '100%';
+
+      const drillCard = document.createElement('div');
+      drillCard.className = 'stage-card';
+      drillCard.style.maxWidth = '600px';
+      drillCard.style.margin = '1rem auto';
+      drillCard.style.padding = '2rem';
+      drillCard.style.textAlign = 'center';
+
+      const drillTitle = tier === 'dynamic' ? 'Random 25 Words Sprint' : 'Targeted Weak Keys Workout';
+      const drillDesc = tier === 'dynamic'
+        ? 'Generates fresh sets of high-frequency English vocabulary to boost rhythm and muscle memory.'
+        : 'Analyzes your past mistyped characters and produces a tailored sequence to eliminate error habits.';
+
+      drillCard.innerHTML = `
+        <div style="font-size:1.4rem; font-weight:800; color:#fff; margin-bottom:0.5rem;">${drillTitle}</div>
+        <div style="font-size:0.95rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">${drillDesc}</div>
+        <button id="startQuickDrillBtn" class="stage-play-btn" style="background:var(--accent-primary); padding:0.85rem 1.75rem; font-size:1rem; width:auto; margin:0 auto;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Launch ${drillTitle} &rarr;</span>
+        </button>
+      `;
+
+      drillCard.querySelector('#startQuickDrillBtn').addEventListener('click', async () => {
+        if (tier === 'dynamic') {
+          const l = await lessonMgr.loadDynamicLesson('words', 25);
+          if (l) showTypingArena(l);
+        } else {
+          const l = await lessonMgr.loadDynamicLesson('weak_keys', 25);
+          if (l) showTypingArena(l);
+        }
+      });
+
+      dashboardStagesContainer.appendChild(drillCard);
+      return;
+    }
+
+    // Standard Structured Tier (Beginner, Intermediate, Advanced, Expert, Legend)
+    const stats = lessonMgr.getTierStats(tier);
+    if (dashboardTierPercent) {
+      dashboardTierPercent.textContent = `${stats.completed} / ${stats.total} Completed (${stats.percent}%)`;
+    }
+    if (dashboardTierBar) {
+      dashboardTierBar.style.width = `${stats.percent}%`;
+    }
+
+    const phaseGroups = lessonMgr.getLessonsGroupedByPhase(tier);
+
+    Object.entries(phaseGroups).forEach(([phaseName, phaseLessons]) => {
+      const phaseBlock = document.createElement('div');
+      phaseBlock.className = 'phase-block';
+
+      const phaseHeader = document.createElement('div');
+      phaseHeader.className = 'phase-header';
+      phaseHeader.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+        <span>${phaseName}</span>
+      `;
+      phaseBlock.appendChild(phaseHeader);
+
+      const cardsGrid = document.createElement('div');
+      cardsGrid.className = 'phase-cards-grid';
+
+      phaseLessons.forEach((l, index) => {
+        const isDone = lessonMgr.isLessonCompleted(l.id);
+        const isUnlocked = lessonMgr.isLessonUnlocked(l.id);
+        const prog = lessonMgr.getLessonProgress(l.id);
+        const isCurrent = currentActiveLesson && currentActiveLesson.id === l.id;
+
+        const card = document.createElement('div');
+        card.className = `stage-card ${isDone ? 'passed' : ''} ${isCurrent ? 'current' : ''} ${!isUnlocked ? 'locked' : ''}`;
+
+        // Status badge
+        let statusBadgeHtml = '';
+        if (isDone) {
+          statusBadgeHtml = `
+            <span class="stage-status-chip passed">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Passed: ${Math.round(prog.best_wpm)} WPM
+            </span>`;
+        } else if (!isUnlocked) {
+          statusBadgeHtml = `
+            <span class="stage-status-chip locked">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Locked
+            </span>`;
+        } else {
+          statusBadgeHtml = `<span class="stage-status-chip unlocked">Ready</span>`;
+        }
+
+        // Action CTA button
+        let buttonHtml = '';
+        if (isDone) {
+          buttonHtml = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Practice Again</span>
+          `;
+        } else if (isUnlocked) {
+          buttonHtml = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <span>Start Stage &rarr;</span>
+          `;
+        } else {
+          buttonHtml = `
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Locked &bull; Complete Previous</span>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="stage-card-top">
+            <div class="stage-card-title">${l.title}</div>
+            ${statusBadgeHtml}
+          </div>
+          <div class="stage-card-desc">${l.description}</div>
+          <div class="stage-meta-row">
+            <span class="target-wpm-chip">Target: <strong>${Math.round(l.min_target_wpm)} WPM</strong></span>
+            <span class="target-wpm-chip">Accuracy: <strong>${Math.round(l.min_accuracy)}%</strong></span>
+          </div>
+          <button class="stage-play-btn ${!isUnlocked ? 'locked' : ''}" type="button">
+            ${buttonHtml}
+          </button>
+        `;
+
+        // Handle Card / CTA button click
+        const clickHandler = () => {
+          if (isUnlocked || isDone || lessonMgr.freePlayMode) {
+            showTypingArena(l);
+          } else {
+            showToast(`Pass the previous stage with 85%+ accuracy to unlock "${l.title}"!`);
+          }
+        };
+
+        const playBtn = card.querySelector('.stage-play-btn');
+        playBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          clickHandler();
+        });
+
+        card.addEventListener('click', () => {
+          clickHandler();
+        });
+
+        cardsGrid.appendChild(card);
+      });
+
+      phaseBlock.appendChild(cardsGrid);
+      dashboardStagesContainer.appendChild(phaseBlock);
     });
   }
 
-  // Close floating picker menu when clicking outside
-  document.addEventListener('click', e => {
-    if (customLessonPicker && !customLessonPicker.contains(e.target)) {
-      closePickerMenu();
-    }
+  // Difficulty Tabs Click Handler
+  difficultyTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const mode = tab.dataset.diff;
+      activeTier = mode;
+      difficultyTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderDashboardStages(mode);
+    });
   });
 
-  // Stepper Arrow Buttons (Prev / Next)
-  if (prevLessonBtn) {
-    prevLessonBtn.addEventListener('click', () => {
-      const diff = lessonMgr.currentDifficulty;
-      const list = lessonMgr.getLessonsForDifficulty(diff);
-      const active = lessonMgr.activeLesson;
-      if (!active || list.length === 0) return;
+  // Free play mode checkbox
+  if (freePlayCheckbox) {
+    freePlayCheckbox.addEventListener('change', e => {
+      lessonMgr.freePlayMode = e.target.checked;
+      renderDashboardStages(activeTier);
+      showToast(e.target.checked ? 'Free Practice Mode: All stages unlocked!' : 'Sequential Progression Mode enabled.');
+    });
+  }
 
-      const idx = list.findIndex(l => l.id === active.id);
+  // =========================================================================
+  // ARENA TOP BAR CONTROLS (VIEW 2)
+  // =========================================================================
+
+  // Return to Stage Selection Dashboard
+  if (arenaBackBtn) {
+    arenaBackBtn.addEventListener('click', () => {
+      showCurriculumView(currentActiveLesson ? currentActiveLesson.difficulty : activeTier);
+    });
+  }
+
+  // Previous Stage Stepper
+  if (arenaPrevBtn) {
+    arenaPrevBtn.addEventListener('click', () => {
+      if (!currentActiveLesson) return;
+      const list = lessonMgr.getLessonsForDifficulty(currentActiveLesson.difficulty);
+      const idx = list.findIndex(l => l.id === currentActiveLesson.id);
       if (idx > 0) {
-        lessonMgr.selectLesson(list[idx - 1]);
+        showTypingArena(list[idx - 1]);
+      } else {
+        showToast('This is the first stage in this level.');
       }
     });
   }
 
-  if (nextLessonBtn) {
-    nextLessonBtn.addEventListener('click', () => {
-      const diff = lessonMgr.currentDifficulty;
-      const list = lessonMgr.getLessonsForDifficulty(diff);
-      const active = lessonMgr.activeLesson;
-      if (!active || list.length === 0) return;
-
-      const idx = list.findIndex(l => l.id === active.id);
-      if (idx < list.length - 1) {
+  // Next Stage Stepper
+  if (arenaNextBtn) {
+    arenaNextBtn.addEventListener('click', () => {
+      if (!currentActiveLesson) return;
+      const list = lessonMgr.getLessonsForDifficulty(currentActiveLesson.difficulty);
+      const idx = list.findIndex(l => l.id === currentActiveLesson.id);
+      if (idx !== -1 && idx < list.length - 1) {
         const nextL = list[idx + 1];
         if (lessonMgr.isLessonUnlocked(nextL.id)) {
-          lessonMgr.selectLesson(nextL);
+          showTypingArena(nextL);
         } else {
           showToast('Pass current stage with 85%+ accuracy to unlock next stage.');
         }
+      } else {
+        showToast('You have reached the final stage of this tier!');
       }
     });
   }
 
-  // Handle Lesson Change
-  lessonMgr.onLessonChange(lesson => {
-    if (!lesson) return;
-    const isDone = lessonMgr.isLessonCompleted(lesson.id);
-    const prog = lessonMgr.getLessonProgress(lesson.id);
-    const statusTag = isDone
-      ? ` <span style="color:#10b981; font-size:0.8rem; margin-left:8px;">[Passed: ${prog ? Math.round(prog.best_wpm) + ' WPM' : 'Complete'}]</span>`
-      : ` <span style="color:var(--text-muted); font-size:0.8rem; margin-left:8px;">[Target: ${Math.round(lesson.min_target_wpm)} WPM]</span>`;
+  // Restart Button in Arena
+  if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      engine.reset();
+      if (hiddenInput) hiddenInput.focus();
+    });
+  }
 
-    lessonMetaTitle.innerHTML = `<span>${lesson.category}</span> — ${lesson.title}${statusTag}`;
-    lessonMetaDesc.textContent = lesson.description;
-    updateLessonPickerUI();
-    engine.loadLesson(lesson);
-  });
+  // =========================================================================
+  // SESSION COMPLETION & RESULTS MODAL
+  // =========================================================================
 
-  // Handle session completion
   engine.onComplete(async data => {
-    const lesson = lessonMgr.activeLesson;
+    const lesson = currentActiveLesson || lessonMgr.activeLesson;
     const acc = Math.round(data.metrics.accuracy);
     const wpm = Math.round(data.metrics.netWpm);
 
@@ -304,7 +496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (passed) {
       lessonMgr.markLessonCompleted(lesson.id, data.metrics);
-      updateLessonPickerUI();
+      updateCurriculumSummary();
 
       // Configure Celebration Banner with clean SVG icons (NO EMOJIS)
       if (resultsCelebrationBanner) {
@@ -354,7 +546,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Show results modal
+    // Show Results Modal
     showResultsModal(data);
 
     // Refresh stats in background
@@ -364,237 +556,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Difficulty Tabs click
-  difficultyTabs.forEach(tab => {
-    tab.addEventListener('click', async () => {
-      difficultyTabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-
-      const mode = tab.dataset.diff;
-      if (mode === 'dynamic') {
-        await lessonMgr.loadDynamicLesson('words', 25);
-      } else if (mode === 'weak_keys') {
-        await lessonMgr.loadDynamicLesson('weak_keys', 25);
-      } else {
-        lessonMgr.setDifficulty(mode);
-      }
-    });
-  });
-
-  // Restart Button
-  restartBtn.addEventListener('click', () => {
-    engine.reset();
-  });
-
-  // Theme selector
-  const savedTheme = localStorage.getItem('typeforge_theme') || 'default';
-  if (savedTheme !== 'default') {
-    document.documentElement.dataset.theme = savedTheme;
-    themeSelect.value = savedTheme;
-  }
-  themeSelect.addEventListener('change', e => {
-    const th = e.target.value;
-    if (th === 'default') {
-      delete document.documentElement.dataset.theme;
-    } else {
-      document.documentElement.dataset.theme = th;
-    }
-    localStorage.setItem('typeforge_theme', th);
-  });
-
-  // Switch sound selector
-  switchSelect.value = window.soundEngine.switchType;
-  switchSelect.addEventListener('change', e => {
-    window.soundEngine.setSwitchType(e.target.value);
-    window.soundEngine.playKeypress(false);
-  });
-
-  // Toggle visual keyboard
-  toggleKbBtn.addEventListener('click', () => {
-    const kbSection = document.getElementById('keyboardSection');
-    const isHidden = kbSection.style.display === 'none';
-    kbSection.style.display = isHidden ? 'block' : 'none';
-    toggleKbBtn.classList.toggle('active', isHidden);
-  });
-
-  // =========================================================================
-  // CURRICULUM MAP & STAGES MODAL RENDERER
-  // =========================================================================
-
-  function renderStagesModal(tier) {
-    activeModalTier = tier;
-
-    // Update tier buttons active state
-    document.querySelectorAll('.stage-tier-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tier === tier);
-    });
-
-    // Update Tier Progress Header
-    const stats = lessonMgr.getTierStats(tier);
-    const tierLabels = {
-      beginner: 'Level 1: Beginner Mastery (20–40 WPM Goal)',
-      medium: 'Level 2: Intermediate Cadence (45–65 WPM Goal)',
-      advanced: 'Level 3: Advanced Web & Syntax (70–85 WPM Goal)',
-      expert: 'Level 4: Expert Code & Century Club (90–100 WPM Goal)',
-      legend: 'Level 5: Legend Apex Trials (110–120+ WPM Goal)',
-    };
-
-    if (tierProgressTitle) tierProgressTitle.textContent = tierLabels[tier] || 'Curriculum Stages';
-    if (tierProgressPercent) tierProgressPercent.textContent = `${stats.completed} / ${stats.total} Completed (${stats.percent}%)`;
-    if (tierProgressBar) tierProgressBar.style.width = `${stats.percent}%`;
-
-    // Render Stage Cards Grouped by Phase
-    stagesListContainer.innerHTML = '';
-    const phaseGroups = lessonMgr.getLessonsGroupedByPhase(tier);
-
-    Object.entries(phaseGroups).forEach(([phaseName, phaseLessons]) => {
-      const phaseBlock = document.createElement('div');
-      phaseBlock.className = 'phase-block';
-
-      const phaseHeader = document.createElement('div');
-      phaseHeader.className = 'phase-header';
-      phaseHeader.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-        <span>${phaseName}</span>
-      `;
-      phaseBlock.appendChild(phaseHeader);
-
-      const cardsGrid = document.createElement('div');
-      cardsGrid.className = 'phase-cards-grid';
-
-      phaseLessons.forEach(l => {
-        const isDone = lessonMgr.isLessonCompleted(l.id);
-        const isUnlocked = lessonMgr.isLessonUnlocked(l.id);
-        const prog = lessonMgr.getLessonProgress(l.id);
-        const isCurrent = lessonMgr.activeLesson && lessonMgr.activeLesson.id === l.id;
-
-        const card = document.createElement('div');
-        card.className = `stage-card ${isDone ? 'passed' : ''} ${isCurrent ? 'current' : ''} ${!isUnlocked ? 'locked' : ''}`;
-
-        let statusBadgeHtml = '';
-        if (isDone) {
-          statusBadgeHtml = `
-            <span class="stage-status-chip passed">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-              Passed: ${Math.round(prog.best_wpm)} WPM
-            </span>`;
-        } else if (!isUnlocked) {
-          statusBadgeHtml = `
-            <span class="stage-status-chip locked">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              Locked
-            </span>`;
-        } else {
-          statusBadgeHtml = `<span class="stage-status-chip unlocked">Ready</span>`;
-        }
-
-        const buttonHtml = isCurrent
-          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>Current Stage</span>'
-          : isDone
-          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Practice Again</span>'
-          : isUnlocked
-          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>Start Stage</span>'
-          : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Locked &bull; Complete Previous</span>';
-
-        card.innerHTML = `
-          <div class="stage-card-top">
-            <div class="stage-card-title">${l.title}</div>
-            ${statusBadgeHtml}
-          </div>
-          <div class="stage-card-desc">${l.description}</div>
-          <div class="stage-meta-row">
-            <span class="target-wpm-chip">Target: <strong>${Math.round(l.min_target_wpm)} WPM</strong></span>
-            <span class="target-wpm-chip">Accuracy: <strong>${Math.round(l.min_accuracy)}%</strong></span>
-          </div>
-          <button class="stage-play-btn ${!isUnlocked ? 'locked' : ''}">
-            ${buttonHtml}
-          </button>
-        `;
-
-        const playBtn = card.querySelector('.stage-play-btn');
-        playBtn.addEventListener('click', () => {
-          if (isUnlocked || isDone || lessonMgr.freePlayMode) {
-            difficultyTabs.forEach(t => {
-              t.classList.toggle('active', t.dataset.diff === tier);
-            });
-            lessonMgr.selectLesson(l);
-            closeModal(stagesModal);
-          } else {
-            showToast(`Pass the previous stage with 85%+ accuracy to unlock "${l.title}"!`);
-          }
-        });
-
-        cardsGrid.appendChild(card);
-      });
-
-      phaseBlock.appendChild(cardsGrid);
-      stagesListContainer.appendChild(phaseBlock);
-    });
-
-    updateCurriculumSummary();
-  }
-
-  // Open Stages Modal
-  if (stagesMapBtn) {
-    stagesMapBtn.addEventListener('click', () => {
-      const currentTier = ['beginner', 'medium', 'advanced', 'expert', 'legend'].includes(lessonMgr.currentDifficulty)
-        ? lessonMgr.currentDifficulty
-        : 'beginner';
-      renderStagesModal(currentTier);
-      openModal(stagesModal);
-    });
-  }
-
-  // Tier buttons in Stages Modal
-  document.querySelectorAll('.stage-tier-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      renderStagesModal(btn.dataset.tier);
-    });
-  });
-
-  // Free play checkbox in Stages Modal
-  if (freePlayCheckbox) {
-    freePlayCheckbox.addEventListener('change', e => {
-      lessonMgr.freePlayMode = e.target.checked;
-      renderStagesModal(activeModalTier);
-      updateLessonPickerUI();
-    });
-  }
-
-  // Custom Text Modal
-  customTextBtn.addEventListener('click', () => {
-    openModal(customTextModal);
-    document.getElementById('customTextInput').focus();
-  });
-
-  document.getElementById('saveCustomTextBtn').addEventListener('click', () => {
-    const title = document.getElementById('customTitleInput').value.trim() || 'Custom Drill';
-    const text = document.getElementById('customTextInput').value.trim();
-    if (text.length > 5) {
-      lessonMgr.setCustomText(title, text);
-      closeModal(customTextModal);
-    }
-  });
-
-  // Stats / Achievements Modal
-  statsModalBtn.addEventListener('click', async () => {
-    const stats = await statsMgr.fetchStats();
-    if (stats) {
-      document.getElementById('statsLifetimeWpm').textContent = `${stats.highest_wpm.toFixed(1)} WPM`;
-      document.getElementById('statsAvgWpm').textContent = `${stats.average_wpm.toFixed(1)} WPM`;
-      document.getElementById('statsAvgAcc').textContent = `${stats.average_accuracy.toFixed(1)}%`;
-      document.getElementById('statsTestsTaken').textContent = stats.total_sessions_completed;
-      document.getElementById('statsTimeTyping').textContent = `${(stats.total_time_seconds / 60).toFixed(1)} min`;
-      document.getElementById('statsStreak').textContent = `${stats.streak_days} days`;
-
-      statsMgr.renderAchievementsList('achievementsContainer', stats.achievements);
-    }
-    openModal(statsModal);
-  });
-
-  // Results Modal Actions
   function showResultsModal(data) {
     document.getElementById('resultWpm').textContent = Math.round(data.metrics.netWpm);
     document.getElementById('resultRawWpm').textContent = Math.round(data.metrics.grossWpm);
@@ -603,7 +564,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('resultConsistency').textContent = `${Math.round(data.metrics.consistency)}%`;
     document.getElementById('resultErrors').textContent = data.metrics.errorCount;
 
-    // Draw Speed Chart on Canvas
     setTimeout(() => {
       statsMgr.drawSpeedChart('speedCanvas', data.wpmGraph);
     }, 100);
@@ -611,33 +571,126 @@ document.addEventListener('DOMContentLoaded', async () => {
     openModal(resultsModal);
   }
 
-  document.getElementById('resultsRepeatBtn').addEventListener('click', () => {
-    closeModal(resultsModal);
-    engine.reset();
-  });
-
-  // Next Lesson button: advances to the next incomplete lesson
-  document.getElementById('resultsNextBtn').addEventListener('click', () => {
-    closeModal(resultsModal);
-
-    // Auto-advance to the next incomplete lesson
-    const nextLesson = lessonMgr.findNextIncompleteLesson();
-    if (nextLesson && nextLesson.id !== lessonMgr.activeLesson?.id) {
-      // Sync active tab in UI
-      difficultyTabs.forEach(t => {
-        t.classList.toggle('active', t.dataset.diff === nextLesson.difficulty);
-      });
-      lessonMgr.selectLesson(nextLesson);
-    } else {
+  // Results Modal Button Actions
+  if (resultsRepeatBtn) {
+    resultsRepeatBtn.addEventListener('click', () => {
+      closeModal(resultsModal);
       engine.reset();
-    }
-  });
+      if (hiddenInput) hiddenInput.focus();
+    });
+  }
 
-  // Modal Close buttons
+  if (resultsBackToStagesBtn) {
+    resultsBackToStagesBtn.addEventListener('click', () => {
+      closeModal(resultsModal);
+      showCurriculumView(currentActiveLesson ? currentActiveLesson.difficulty : activeTier);
+    });
+  }
+
+  if (resultsNextBtn) {
+    resultsNextBtn.addEventListener('click', () => {
+      closeModal(resultsModal);
+
+      // Advance to next incomplete lesson
+      const nextLesson = lessonMgr.findNextIncompleteLesson();
+      if (nextLesson) {
+        showTypingArena(nextLesson);
+      } else {
+        engine.reset();
+        if (hiddenInput) hiddenInput.focus();
+      }
+    });
+  }
+
+  // =========================================================================
+  // HEADER CONTROLS (THEME, SWITCHES, KEYBOARD, STATS, CUSTOM)
+  // =========================================================================
+
+  // Theme selector
+  const savedTheme = localStorage.getItem('typeforge_theme') || 'default';
+  if (savedTheme !== 'default') {
+    document.documentElement.dataset.theme = savedTheme;
+    if (themeSelect) themeSelect.value = savedTheme;
+  }
+  if (themeSelect) {
+    themeSelect.addEventListener('change', e => {
+      const th = e.target.value;
+      if (th === 'default') {
+        delete document.documentElement.dataset.theme;
+      } else {
+        document.documentElement.dataset.theme = th;
+      }
+      localStorage.setItem('typeforge_theme', th);
+    });
+  }
+
+  // Switch sound selector
+  if (switchSelect) {
+    switchSelect.value = window.soundEngine.switchType;
+    switchSelect.addEventListener('change', e => {
+      window.soundEngine.setSwitchType(e.target.value);
+      window.soundEngine.playKeypress(false);
+    });
+  }
+
+  // Toggle visual keyboard
+  if (toggleKbBtn) {
+    toggleKbBtn.addEventListener('click', () => {
+      const kbSection = document.getElementById('keyboardSection');
+      if (kbSection) {
+        const isHidden = kbSection.style.display === 'none';
+        kbSection.style.display = isHidden ? 'block' : 'none';
+        toggleKbBtn.classList.toggle('active', isHidden);
+      }
+    });
+  }
+
+  // Custom text modal
+  if (customTextBtn) {
+    customTextBtn.addEventListener('click', () => {
+      openModal(customTextModal);
+      document.getElementById('customTextInput').focus();
+    });
+  }
+
+  const saveCustomBtn = document.getElementById('saveCustomTextBtn');
+  if (saveCustomBtn) {
+    saveCustomBtn.addEventListener('click', () => {
+      const title = document.getElementById('customTitleInput').value.trim() || 'Custom Drill';
+      const text = document.getElementById('customTextInput').value.trim();
+      if (text.length > 5) {
+        lessonMgr.setCustomText(title, text);
+        closeModal(customTextModal);
+        showTypingArena(lessonMgr.activeLesson);
+      }
+    });
+  }
+
+  // Stats / Achievements Modal
+  if (statsModalBtn) {
+    statsModalBtn.addEventListener('click', async () => {
+      const stats = await statsMgr.fetchStats();
+      if (stats) {
+        document.getElementById('statsLifetimeWpm').textContent = `${stats.highest_wpm.toFixed(1)} WPM`;
+        document.getElementById('statsAvgWpm').textContent = `${stats.average_wpm.toFixed(1)} WPM`;
+        document.getElementById('statsAvgAcc').textContent = `${stats.average_accuracy.toFixed(1)}%`;
+        document.getElementById('statsTestsTaken').textContent = stats.total_sessions_completed;
+        document.getElementById('statsTimeTyping').textContent = `${(stats.total_time_seconds / 60).toFixed(1)} min`;
+        document.getElementById('statsStreak').textContent = `${stats.streak_days} days`;
+
+        statsMgr.renderAchievementsList('achievementsContainer', stats.achievements);
+      }
+      openModal(statsModal);
+    });
+  }
+
+  // Modal helpers
   document.querySelectorAll('.modal-close-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.modal-backdrop').forEach(m => closeModal(m));
-      hiddenInput.focus();
+      if (typingArenaView.classList.contains('active') && hiddenInput) {
+        hiddenInput.focus();
+      }
     });
   });
 
@@ -647,7 +700,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function closeModal(modal) {
     if (modal) modal.classList.remove('active');
-    hiddenInput.focus();
   }
 
   function showToast(msg) {
@@ -675,30 +727,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', e => {
-    // Tab + Enter or Escape to quick restart
+    const activeModal = document.querySelector('.modal-backdrop.active');
     if (e.key === 'Escape') {
-      const activeModal = document.querySelector('.modal-backdrop.active');
       if (activeModal) {
         closeModal(activeModal);
-      } else {
-        closePickerMenu();
-        engine.reset();
+        if (typingArenaView.classList.contains('active') && hiddenInput) {
+          hiddenInput.focus();
+        }
+      } else if (typingArenaView.classList.contains('active')) {
+        // Return to Stage Selection Dashboard on Escape
+        showCurriculumView(currentActiveLesson ? currentActiveLesson.difficulty : activeTier);
       }
     } else if (e.key === 'Tab') {
-      e.preventDefault();
-      closePickerMenu();
-      engine.reset();
+      if (!activeModal && typingArenaView.classList.contains('active')) {
+        e.preventDefault();
+        engine.reset();
+        if (hiddenInput) hiddenInput.focus();
+      }
     }
   });
 
   // =========================================================================
-  // INITIALIZATION: Load catalog & resume from persistent uncompleted level
+  // APP INITIALIZATION
   // =========================================================================
 
-  // 1. Load full curriculum (68 lessons across 5 tiers)
+  // 1. Fetch full 68-stage curriculum from backend (or fallback catalog)
   await lessonMgr.fetchLessons();
 
-  // 2. Load user stats & progression history from backend
+  // 2. Fetch user lifetime stats and progression history
   const initialStats = await statsMgr.fetchStats();
   if (initialStats) {
     lessonMgr.syncProgress(initialStats);
@@ -707,14 +763,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 3. Update Curriculum summary badges
   updateCurriculumSummary();
 
-  // 4. Automatically resume at the next incomplete lesson
+  // 4. Determine user's current resume lesson
   const resumeLesson = lessonMgr.determineResumeLesson();
   if (resumeLesson) {
-    difficultyTabs.forEach(t => {
-      t.classList.toggle('active', t.dataset.diff === resumeLesson.difficulty);
-    });
-    lessonMgr.selectLesson(resumeLesson);
-  } else {
-    lessonMgr.setDifficulty('beginner');
+    currentActiveLesson = resumeLesson;
+    activeTier = resumeLesson.difficulty;
   }
+
+  // 5. Land the user on View 1 (Stage Selection Dashboard)
+  // "pehle stage chune user then new page pr typing"
+  showCurriculumView(activeTier);
 });

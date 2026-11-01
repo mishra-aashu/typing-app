@@ -19,19 +19,19 @@
       "last_completed_at": "2026-11-01T09:27:41.191247173+00:00"
     }
   },
-  "last_active_lesson_id": "beg-01-home-row-1",
+  "last_active_lesson_id": "med-01-left-shift",
   "key_error_heatmap": {
-    "y": 4,
-    "t": 2,
     "f": 1490,
-    "u": 6,
     "a": 4,
-    "o": 6,
+    "n": 2,
+    "t": 2,
     " ": 1130,
+    "y": 4,
     "j": 1532,
     "e": 2,
-    "n": 2,
-    "b": 2
+    "o": 6,
+    "b": 2,
+    "u": 6
   },
   "achievements": [
     {
