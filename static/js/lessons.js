@@ -810,18 +810,28 @@ class LessonManager {
   }
 
   /**
-   * Determine if a lesson is unlocked.
-   * Free play unlocks everything. Otherwise, the first lesson is unlocked,
-   * or a lesson is unlocked if the immediate previous lesson in the curriculum is completed.
+   * Determine if a lesson is unlocked:
+   * 1. If freePlayMode is on, all lessons are unlocked.
+   * 2. If the lesson has already been completed, it is always unlocked.
+   * 3. The FIRST lesson of EVERY tier (Beginner, Intermediate, Advanced, Expert, Legend) is ALWAYS unlocked!
+   * 4. For subsequent lessons in that tier, it unlocks when the previous lesson in that tier is completed.
    */
   isLessonUnlocked(lessonId) {
     if (this.freePlayMode) return true;
-    const all = this.getAllLessonsFlat();
-    const index = all.findIndex(l => l.id === lessonId);
-    if (index <= 0) return true; // First lesson is always unlocked
-    // Unlocked if previous lesson has been completed
-    const prevLesson = all[index - 1];
-    return this.completedLessonIds.has(prevLesson.id);
+    if (this.completedLessonIds.has(lessonId)) return true;
+
+    // Find which tier this lesson belongs to
+    for (const [tier, list] of Object.entries(this.lessons)) {
+      const idx = list.findIndex(l => l.id === lessonId);
+      if (idx !== -1) {
+        // First lesson of ANY tier is always open for the user to try!
+        if (idx === 0) return true;
+        // Otherwise, unlocked if previous lesson in this tier is completed
+        const prevInTier = list[idx - 1];
+        return this.completedLessonIds.has(prevInTier.id);
+      }
+    }
+    return true;
   }
 
   /**

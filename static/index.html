@@ -143,17 +143,42 @@
         </button>
       </div>
 
-      <div class="lesson-selector-dropdown">
-        <select id="lessonSelect" class="lesson-select" title="Select Curriculum Lesson">
-          <!-- Populated dynamically via JS -->
-        </select>
+      <div class="lesson-stepper-control">
+        <button id="prevLessonBtn" class="stepper-arrow-btn" title="Previous Stage" aria-label="Previous Stage">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="custom-lesson-picker" id="customLessonPicker">
+          <button id="lessonPickerTrigger" class="lesson-picker-trigger" type="button" aria-expanded="false" title="Click to view stage list">
+            <span class="picker-phase" id="pickerPhaseLabel">Phase 1</span>
+            <span class="picker-title" id="pickerTitleLabel">F & J Index Anchor Keys</span>
+            <span class="picker-target" id="pickerTargetLabel">20 WPM</span>
+            <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <!-- Floating Glass Dropdown Menu -->
+          <div id="lessonPickerMenu" class="lesson-picker-menu" role="menu">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <button id="nextLessonBtn" class="stepper-arrow-btn" title="Next Stage" aria-label="Next Stage">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+
         <button id="stagesMapBtn" class="stages-map-btn" title="View Full Curriculum Map & Progress">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
             <line x1="8" y1="2" x2="8" y2="18"></line>
             <line x1="16" y1="6" x2="16" y2="22"></line>
           </svg>
-          <span>Stages</span>
+          <span>Curriculum</span>
           <span id="stagesCompletedBadge" class="stages-badge">0/68</span>
         </button>
       </div>

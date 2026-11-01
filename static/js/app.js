@@ -1,7 +1,7 @@
 /**
  * TypeForge - Master Application Controller
- * Handles 68+ curriculum stages across 5 difficulty tiers,
- * stage progression map, milestone celebration banners, and persistent state.
+ * High-velocity touch typing tutor with 68 structured stages across 5 difficulty tiers.
+ * Features custom glass stage stepper, stage map drawer, milestone celebrations, and persistence.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -19,9 +19,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const lessonMetaTitle = document.getElementById('lessonMetaTitle');
   const lessonMetaDesc = document.getElementById('lessonMetaDesc');
 
-  // Controls & Dropdowns
+  // Controls & Navigation
   const difficultyTabs = document.querySelectorAll('.diff-tab');
-  const lessonSelect = document.getElementById('lessonSelect');
   const restartBtn = document.getElementById('restartBtn');
   const themeSelect = document.getElementById('themeSelect');
   const switchSelect = document.getElementById('switchSelect');
@@ -30,6 +29,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statsModalBtn = document.getElementById('statsModalBtn');
   const stagesMapBtn = document.getElementById('stagesMapBtn');
   const stagesCompletedBadge = document.getElementById('stagesCompletedBadge');
+
+  // Custom Lesson Stepper & Picker Elements
+  const prevLessonBtn = document.getElementById('prevLessonBtn');
+  const nextLessonBtn = document.getElementById('nextLessonBtn');
+  const customLessonPicker = document.getElementById('customLessonPicker');
+  const lessonPickerTrigger = document.getElementById('lessonPickerTrigger');
+  const lessonPickerMenu = document.getElementById('lessonPickerMenu');
+  const pickerPhaseLabel = document.getElementById('pickerPhaseLabel');
+  const pickerTitleLabel = document.getElementById('pickerTitleLabel');
+  const pickerTargetLabel = document.getElementById('pickerTargetLabel');
 
   // Modals
   const resultsModal = document.getElementById('resultsModal');
@@ -96,45 +105,159 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Populate lesson dropdown with completion status & phase grouping
-  function updateLessonDropdown() {
-    lessonSelect.innerHTML = '';
-    const diff = lessonMgr.currentDifficulty;
-    const lessons = lessonMgr.getLessonsForDifficulty(diff);
+  // Populate Custom Lesson Picker Trigger & Floating Menu
+  function updateLessonPickerUI() {
+    const active = lessonMgr.activeLesson;
+    if (!active) return;
 
-    // Group by Phase in the dropdown using optgroup
-    const groups = lessonMgr.getLessonsGroupedByPhase(diff);
+    // Update trigger labels
+    if (pickerPhaseLabel) pickerPhaseLabel.textContent = active.category || 'Curriculum';
+    if (pickerTitleLabel) pickerTitleLabel.textContent = active.title;
+    if (pickerTargetLabel) pickerTargetLabel.textContent = `${Math.round(active.min_target_wpm)} WPM`;
 
-    Object.entries(groups).forEach(([phaseName, phaseLessons]) => {
-      const groupEl = document.createElement('optgroup');
-      groupEl.label = phaseName;
+    // Populate custom floating menu
+    if (lessonPickerMenu) {
+      lessonPickerMenu.innerHTML = '';
+      const diff = lessonMgr.currentDifficulty;
+      const groups = lessonMgr.getLessonsGroupedByPhase(diff);
 
-      phaseLessons.forEach(l => {
-        const opt = document.createElement('option');
-        opt.value = l.id;
-        const isDone = lessonMgr.isLessonCompleted(l.id);
-        const isUnlocked = lessonMgr.isLessonUnlocked(l.id);
-        const prog = lessonMgr.getLessonProgress(l.id);
-        const isCurrent = lessonMgr.activeLesson && lessonMgr.activeLesson.id === l.id;
+      Object.entries(groups).forEach(([phaseName, phaseLessons]) => {
+        const headerEl = document.createElement('div');
+        headerEl.className = 'picker-menu-phase-header';
+        headerEl.textContent = phaseName;
+        lessonPickerMenu.appendChild(headerEl);
 
-        let badge = '';
-        if (isDone) {
-          badge = `[✓ ${prog ? Math.round(prog.best_wpm) + ' WPM' : 'Passed'}] `;
-        } else if (!isUnlocked) {
-          badge = '[🔒 Locked] ';
-        } else if (isCurrent) {
-          badge = '[▶ Active] ';
-        }
+        phaseLessons.forEach(l => {
+          const isDone = lessonMgr.isLessonCompleted(l.id);
+          const isUnlocked = lessonMgr.isLessonUnlocked(l.id);
+          const prog = lessonMgr.getLessonProgress(l.id);
+          const isCurrent = active && active.id === l.id;
 
-        opt.textContent = `${badge}${l.title} (🎯 ${Math.round(l.min_target_wpm)} WPM)`;
-        if (isCurrent) opt.selected = true;
-        groupEl.appendChild(opt);
+          const itemEl = document.createElement('div');
+          itemEl.className = `picker-menu-item ${isCurrent ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`;
+
+          let statusIconHtml = '';
+          if (isDone) {
+            statusIconHtml = `
+              <span class="picker-item-status-icon passed">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>`;
+          } else if (!isUnlocked) {
+            statusIconHtml = `
+              <span class="picker-item-status-icon locked" style="color:var(--text-muted);">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </span>`;
+          } else {
+            statusIconHtml = `<span class="picker-item-status-icon dot"></span>`;
+          }
+
+          let rightBadgeHtml = '';
+          if (isDone && prog?.best_wpm) {
+            rightBadgeHtml = `<span class="picker-item-best">${Math.round(prog.best_wpm)} WPM</span>`;
+          } else {
+            rightBadgeHtml = `<span class="picker-item-target">${Math.round(l.min_target_wpm)} WPM</span>`;
+          }
+
+          itemEl.innerHTML = `
+            <div class="picker-item-left">
+              ${statusIconHtml}
+              <span class="picker-item-name">${l.title}</span>
+            </div>
+            <div class="picker-item-right">
+              ${rightBadgeHtml}
+            </div>
+          `;
+
+          itemEl.addEventListener('click', e => {
+            e.stopPropagation();
+            if (isUnlocked || isDone || lessonMgr.freePlayMode) {
+              lessonMgr.selectLesson(l);
+              closePickerMenu();
+            } else {
+              // Notify user cleanly without raw emojis
+              showToast('Pass previous stage to unlock this lesson.');
+            }
+          });
+
+          lessonPickerMenu.appendChild(itemEl);
+        });
       });
-
-      lessonSelect.appendChild(groupEl);
-    });
+    }
 
     updateCurriculumSummary();
+  }
+
+  // Toggle Custom Lesson Picker Dropdown
+  function togglePickerMenu() {
+    const isShowing = lessonPickerMenu.classList.contains('show');
+    if (isShowing) {
+      closePickerMenu();
+    } else {
+      openPickerMenu();
+    }
+  }
+
+  function openPickerMenu() {
+    lessonPickerMenu.classList.add('show');
+    lessonPickerTrigger.classList.add('active');
+  }
+
+  function closePickerMenu() {
+    lessonPickerMenu.classList.remove('show');
+    lessonPickerTrigger.classList.remove('active');
+  }
+
+  if (lessonPickerTrigger) {
+    lessonPickerTrigger.addEventListener('click', e => {
+      e.stopPropagation();
+      togglePickerMenu();
+    });
+  }
+
+  // Close floating picker menu when clicking outside
+  document.addEventListener('click', e => {
+    if (customLessonPicker && !customLessonPicker.contains(e.target)) {
+      closePickerMenu();
+    }
+  });
+
+  // Stepper Arrow Buttons (Prev / Next)
+  if (prevLessonBtn) {
+    prevLessonBtn.addEventListener('click', () => {
+      const diff = lessonMgr.currentDifficulty;
+      const list = lessonMgr.getLessonsForDifficulty(diff);
+      const active = lessonMgr.activeLesson;
+      if (!active || list.length === 0) return;
+
+      const idx = list.findIndex(l => l.id === active.id);
+      if (idx > 0) {
+        lessonMgr.selectLesson(list[idx - 1]);
+      }
+    });
+  }
+
+  if (nextLessonBtn) {
+    nextLessonBtn.addEventListener('click', () => {
+      const diff = lessonMgr.currentDifficulty;
+      const list = lessonMgr.getLessonsForDifficulty(diff);
+      const active = lessonMgr.activeLesson;
+      if (!active || list.length === 0) return;
+
+      const idx = list.findIndex(l => l.id === active.id);
+      if (idx < list.length - 1) {
+        const nextL = list[idx + 1];
+        if (lessonMgr.isLessonUnlocked(nextL.id)) {
+          lessonMgr.selectLesson(nextL);
+        } else {
+          showToast('Pass current stage with 85%+ accuracy to unlock next stage.');
+        }
+      }
+    });
   }
 
   // Handle Lesson Change
@@ -143,12 +266,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isDone = lessonMgr.isLessonCompleted(lesson.id);
     const prog = lessonMgr.getLessonProgress(lesson.id);
     const statusTag = isDone
-      ? ` <span style="color:#10b981; font-size:0.8rem; margin-left:8px;">[Passed: ${prog ? Math.round(prog.best_wpm) + ' WPM' : '✓'}]</span>`
+      ? ` <span style="color:#10b981; font-size:0.8rem; margin-left:8px;">[Passed: ${prog ? Math.round(prog.best_wpm) + ' WPM' : 'Complete'}]</span>`
       : ` <span style="color:var(--text-muted); font-size:0.8rem; margin-left:8px;">[Target: ${Math.round(lesson.min_target_wpm)} WPM]</span>`;
 
     lessonMetaTitle.innerHTML = `<span>${lesson.category}</span> — ${lesson.title}${statusTag}`;
     lessonMetaDesc.textContent = lesson.description;
-    updateLessonDropdown();
+    updateLessonPickerUI();
     engine.loadLesson(lesson);
   });
 
@@ -158,34 +281,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     const acc = Math.round(data.metrics.accuracy);
     const wpm = Math.round(data.metrics.netWpm);
 
-    // Check pass criteria (accuracy >= 85%)
+    // Pass criteria: accuracy >= 85%
     const passed = acc >= 85 && lesson;
 
     if (passed) {
       lessonMgr.markLessonCompleted(lesson.id, data.metrics);
-      updateLessonDropdown();
+      updateLessonPickerUI();
 
-      // Configure Celebration Banner
+      // Configure Celebration Banner with clean SVG icons (NO EMOJIS)
       if (resultsCelebrationBanner) {
         resultsCelebrationBanner.style.display = 'flex';
-        let celebrationMsg = '';
+        resultsCelebrationBanner.style.background = 'linear-gradient(135deg, rgba(121, 82, 255, 0.25) 0%, rgba(0, 240, 255, 0.25) 100%)';
+        resultsCelebrationBanner.style.borderColor = 'var(--accent-primary)';
 
+        let celebrationMsg = '';
         if (lesson.id === 'beg-18-beginner-boss-test') {
-          celebrationMsg = '🎉 <strong>Beginner Tier Mastered!</strong> You conquered 40 WPM! Intermediate Tier is now fully unlocked!';
+          celebrationMsg = '<strong>Beginner Tier Mastered!</strong> You conquered 40 WPM. Intermediate Tier is now unlocked!';
         } else if (lesson.id === 'med-18-intermediate-boss-test') {
-          celebrationMsg = '🚀 <strong>Intermediate Milestone Passed!</strong> You broke 65 WPM! Advanced Code Tier is now unlocked!';
+          celebrationMsg = '<strong>Intermediate Milestone Passed!</strong> You broke 65 WPM. Advanced Tier is now unlocked!';
         } else if (lesson.id === 'adv-14-advanced-boss-test') {
-          celebrationMsg = '⚡ <strong>Advanced Velocity Achieved!</strong> You hit 85 WPM! Welcome to Expert Code tier!';
+          celebrationMsg = '<strong>Advanced Velocity Achieved!</strong> You hit 85 WPM. Welcome to Expert Code tier!';
         } else if (lesson.id === 'exp-12-expert-boss-test') {
-          celebrationMsg = '👑 <strong>Century Club Champion!</strong> You crushed 100 WPM! Legend Apex Tier is now unlocked!';
+          celebrationMsg = '<strong>Century Club Champion!</strong> You crushed 100 WPM. Legend Apex Tier is now unlocked!';
         } else if (lesson.id === 'leg-06-grand-master') {
-          celebrationMsg = '🏆 <strong>GRAND MASTER 120+ WPM APEX!</strong> You have reached the ultimate pinnacle of typing prowess!';
+          celebrationMsg = '<strong>GRAND MASTER APEX ACHIEVED!</strong> You have reached the pinnacle of typing speed!';
         } else {
-          celebrationMsg = `🌟 <strong>Stage Complete!</strong> Accuracy: <strong>${acc}%</strong> &bull; Net Speed: <strong>${wpm} WPM</strong>. Next stage is ready!`;
+          celebrationMsg = `<strong>Stage Complete!</strong> Accuracy: <strong>${acc}%</strong> &bull; Net Speed: <strong>${wpm} WPM</strong>. Next stage unlocked!`;
         }
 
         resultsCelebrationBanner.innerHTML = `
-          <div class="banner-icon">🎯</div>
+          <div class="banner-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
           <div class="banner-text">${celebrationMsg}</div>
         `;
       }
@@ -195,8 +324,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultsCelebrationBanner.style.background = 'rgba(239, 68, 68, 0.15)';
         resultsCelebrationBanner.style.borderColor = 'rgba(239, 68, 68, 0.4)';
         resultsCelebrationBanner.innerHTML = `
-          <div class="banner-icon">💡</div>
-          <div class="banner-text">Requires <strong>85%+ accuracy</strong> to unlock the next stage. Take a breath and try again!</div>
+          <div class="banner-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div class="banner-text">Requires <strong>85%+ accuracy</strong> to unlock the next stage. Maintain relaxed rhythm and try again!</div>
         `;
       }
     }
@@ -226,11 +361,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         lessonMgr.setDifficulty(mode);
       }
     });
-  });
-
-  // Lesson dropdown change
-  lessonSelect.addEventListener('change', e => {
-    lessonMgr.selectLessonById(e.target.value);
   });
 
   // Restart Button
@@ -306,7 +436,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const phaseHeader = document.createElement('div');
       phaseHeader.className = 'phase-header';
       phaseHeader.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
         <span>${phaseName}</span>
       `;
       phaseBlock.appendChild(phaseHeader);
@@ -325,9 +457,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let statusBadgeHtml = '';
         if (isDone) {
-          statusBadgeHtml = `<span class="stage-status-chip passed">✓ Passed: ${Math.round(prog.best_wpm)} WPM</span>`;
+          statusBadgeHtml = `
+            <span class="stage-status-chip passed">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:inline-block; vertical-align:middle; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>
+              Passed: ${Math.round(prog.best_wpm)} WPM
+            </span>`;
         } else if (!isUnlocked) {
-          statusBadgeHtml = `<span class="stage-status-chip locked">🔒 Locked</span>`;
+          statusBadgeHtml = `
+            <span class="stage-status-chip locked">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              Locked
+            </span>`;
         } else {
           statusBadgeHtml = `<span class="stage-status-chip unlocked">Ready</span>`;
         }
@@ -391,7 +531,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     freePlayCheckbox.addEventListener('change', e => {
       lessonMgr.freePlayMode = e.target.checked;
       renderStagesModal(activeModalTier);
-      updateLessonDropdown();
+      updateLessonPickerUI();
     });
   }
 
@@ -482,6 +622,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     hiddenInput.focus();
   }
 
+  function showToast(msg) {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>${msg}</span>
+    `;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 2800);
+  }
+
   // Global Keyboard Shortcuts
   window.addEventListener('keydown', e => {
     // Tab + Enter or Escape to quick restart
@@ -490,10 +653,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (activeModal) {
         closeModal(activeModal);
       } else {
+        closePickerMenu();
         engine.reset();
       }
     } else if (e.key === 'Tab') {
       e.preventDefault();
+      closePickerMenu();
       engine.reset();
     }
   });
