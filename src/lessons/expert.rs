@@ -1,0 +1,66 @@
+use super::beginner::LessonItem;
+
+pub fn get_expert_lessons() -> Vec<LessonItem> {
+    vec![
+        LessonItem {
+            id: "exp-01-rust-syntax".to_string(),
+            title: "Rust Core & Pattern Matching".to_string(),
+            description: "Practice typing idiomatic Rust structs, enums, match expressions, and curly braces.".to_string(),
+            difficulty: "expert".to_string(),
+            category: "Code: Rust".to_string(),
+            target_text: "pub fn parse_packet(buf: &[u8]) -> Result<Header, ParseError> { match buf.get(0..4) { Some(magic) if magic == [0x7F, b'E', b'L', b'F'] => Ok(Header::Elf), _ => Err(ParseError::InvalidMagic), } }".to_string(),
+            min_target_wpm: 60.0,
+            min_accuracy: 97.0,
+        },
+        LessonItem {
+            id: "exp-02-typescript-async".to_string(),
+            title: "TypeScript Async Streams".to_string(),
+            description: "Generics, promises, arrow functions, destructuring, and template literals.".to_string(),
+            difficulty: "expert".to_string(),
+            category: "Code: TypeScript".to_string(),
+            target_text: "export const fetchMetrics = async <T>(endpoint: string, opts?: RequestInit): Promise<ApiResponse<T>> => { const res = await fetch(`${API_BASE}/${endpoint}`, { ...opts, headers: { 'Content-Type': 'application/json' } }); return res.json(); };".to_string(),
+            min_target_wpm: 65.0,
+            min_accuracy: 97.0,
+        },
+        LessonItem {
+            id: "exp-03-symbols-blitz".to_string(),
+            title: "Programming Symbols Blitz".to_string(),
+            description: "Intense shift-key workout with braces, brackets, operators, and delimiters.".to_string(),
+            difficulty: "expert".to_string(),
+            category: "Symbol Drills".to_string(),
+            target_text: "{ [ ( < & | ^ ! ~ + - * / % = == === != !== <= >= && || -> => :: . , ; : ? ) ] }".to_string(),
+            min_target_wpm: 45.0,
+            min_accuracy: 96.0,
+        },
+        LessonItem {
+            id: "exp-04-python-comprehensions".to_string(),
+            title: "Pythonic Generators & Decorators".to_string(),
+            description: "Indentation, colons, lambdas, and list comprehensions in Python 3.12+.".to_string(),
+            difficulty: "expert".to_string(),
+            category: "Code: Python".to_string(),
+            target_text: "matrix = [[(x ** 2) + y for x in range(10) if x % 2 == 0] for y in row_offsets if y > 0]".to_string(),
+            min_target_wpm: 60.0,
+            min_accuracy: 97.0,
+        },
+        LessonItem {
+            id: "exp-05-sql-analytics".to_string(),
+            title: "SQL Window Functions & Aggregations".to_string(),
+            description: "Capitalized SQL keywords, subqueries, and window partition statements.".to_string(),
+            difficulty: "expert".to_string(),
+            category: "Code: SQL".to_string(),
+            target_text: "SELECT user_id, AVG(wpm) OVER (PARTITION BY user_id ORDER BY completed_at ROWS BETWEEN 9 PRECEDING AND CURRENT ROW) AS rolling_wpm FROM typing_sessions WHERE accuracy >= 95.0 GROUP BY user_id, completed_at, wpm;".to_string(),
+            min_target_wpm: 60.0,
+            min_accuracy: 97.0,
+        },
+        LessonItem {
+            id: "exp-06-high-speed-prose".to_string(),
+            title: "Elite 100+ WPM Velocity Test".to_string(),
+            description: "Complex sentence cadence designed for high-velocity touch typists.".to_string(),
+            difficulty: "expert".to_string(),
+            category: "Speed Champion".to_string(),
+            target_text: "The architectural elegance of modern high-performance microprocessors derives from out-of-order instruction scheduling, speculative branch prediction, and multi-tiered cache hierarchies operating synchronously at gigahertz clock frequencies.".to_string(),
+            min_target_wpm: 80.0,
+            min_accuracy: 98.0,
+        },
+    ]
+}

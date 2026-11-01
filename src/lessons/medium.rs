@@ -1,0 +1,66 @@
+use super::beginner::LessonItem;
+
+pub fn get_medium_lessons() -> Vec<LessonItem> {
+    vec![
+        LessonItem {
+            id: "med-01-punctuation".to_string(),
+            title: "Punctuation & Flow".to_string(),
+            description: "Commas, periods, apostrophes, and question marks in natural sentences.".to_string(),
+            difficulty: "medium".to_string(),
+            category: "Punctuation".to_string(),
+            target_text: "Don't stop now, keep moving forward! Can you hear the music? Yes, it's playing softly, yet clearly.".to_string(),
+            min_target_wpm: 45.0,
+            min_accuracy: 96.0,
+        },
+        LessonItem {
+            id: "med-02-numbers-row".to_string(),
+            title: "Number Row Mastery".to_string(),
+            description: "Practice top number keys 0-9 without looking down at the keyboard.".to_string(),
+            difficulty: "medium".to_string(),
+            category: "Numbers".to_string(),
+            target_text: "In 1984, the population reached 4,800,000, while in 2026, about 85% of people used 5G devices.".to_string(),
+            min_target_wpm: 40.0,
+            min_accuracy: 94.0,
+        },
+        LessonItem {
+            id: "med-03-classic-quote".to_string(),
+            title: "Wisdom of Marcus Aurelius".to_string(),
+            description: "Classic philosophical passage requiring steady cadence and capitals.".to_string(),
+            difficulty: "medium".to_string(),
+            category: "Quotes".to_string(),
+            target_text: "You have power over your mind, not outside events. Realize this, and you will find strength in everyday moments.".to_string(),
+            min_target_wpm: 50.0,
+            min_accuracy: 96.0,
+        },
+        LessonItem {
+            id: "med-04-tech-narrative".to_string(),
+            title: "The Architecture of the Web".to_string(),
+            description: "Technical vocabulary with mixed sentence structure and capitalization.".to_string(),
+            difficulty: "medium".to_string(),
+            category: "Technical".to_string(),
+            target_text: "Distributed systems communicate via reliable protocols, ensuring that packet loss does not corrupt critical payload buffers.".to_string(),
+            min_target_wpm: 55.0,
+            min_accuracy: 96.0,
+        },
+        LessonItem {
+            id: "med-05-speed-burst".to_string(),
+            title: "60-Second Speed Burst".to_string(),
+            description: "Flowing prose designed to break past your 60 WPM barrier.".to_string(),
+            difficulty: "medium".to_string(),
+            category: "Speed Burst".to_string(),
+            target_text: "The quick brown fox jumps over the lazy dog while bright sunbeams dance across golden autumn leaves and gentle evening breezes whisper through the tall green trees.".to_string(),
+            min_target_wpm: 60.0,
+            min_accuracy: 97.0,
+        },
+        LessonItem {
+            id: "med-06-dialogue".to_string(),
+            title: "Dialogue & Quotation Marks".to_string(),
+            description: "Conversational quotes with shifted punctuation: double quotes, hyphens, and exclamation points.".to_string(),
+            difficulty: "medium".to_string(),
+            category: "Dialogue".to_string(),
+            target_text: "\"Wait!\" she called out, \"Did you check the server logs? Everything looks green—we are ready to deploy!\"".to_string(),
+            min_target_wpm: 50.0,
+            min_accuracy: 95.0,
+        },
+    ]
+}

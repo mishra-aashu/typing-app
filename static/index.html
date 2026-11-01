@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypeForge — High-Velocity Typing Tutor (Rust Native)</title>
+  <meta name="description" content="TypeForge is a blazing-fast, cross-platform typing tutor built with Rust. Learn touch typing from beginner to expert programmer level with real-time analytics and mechanical keyboard sounds.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/keyboard.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+  <!-- Ambient Glow Background -->
+  <div class="ambient-glow">
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo-icon">⚡</div>
+        <div class="brand-title">
+          <h1 class="brand-name">TypeForge</h1>
+          <span class="brand-tagline">Rust Native Engine</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Mechanical Switch Selector -->
+        <select id="switchSelect" class="switch-select" title="Switch Sound Profile">
+          <option value="blue">🔊 Cherry MX Blue (Clicky)</option>
+          <option value="brown">🔉 Cherry MX Brown (Tactile)</option>
+          <option value="red">🔈 Cherry MX Red (Linear)</option>
+          <option value="off">🔇 Sound Off</option>
+        </select>
+
+        <!-- Theme Picker -->
+        <select id="themeSelect" class="theme-select" title="Theme Selector">
+          <option value="default">🌌 Moonlight Violet</option>
+          <option value="cyberpunk">⚡ Cyberpunk Neon</option>
+          <option value="tokyo">🌸 Tokyo Night</option>
+          <option value="emerald">🟢 Emerald Matrix</option>
+          <option value="amber">🟠 Retro Amber</option>
+        </select>
+
+        <!-- Custom Drill Button -->
+        <button id="customTextBtn" class="ctrl-btn" title="Create Custom Drill">
+          <span>📝 Custom</span>
+        </button>
+
+        <!-- Lifetime Stats & Achievements Button -->
+        <button id="statsModalBtn" class="ctrl-btn" title="View Statistics & Badges">
+          <span>🏆 Stats</span>
+        </button>
+
+        <!-- Toggle Keyboard Visualizer Button -->
+        <button id="toggleKbBtn" class="ctrl-btn active" title="Toggle Keyboard Visualizer">
+          <span>⌨ Keyboard</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Difficulty & Mode Selector -->
+    <div class="modes-bar">
+      <div class="difficulty-tabs">
+        <button class="diff-tab active" data-diff="beginner">
+          <span>🟢 Beginner</span>
+        </button>
+        <button class="diff-tab" data-diff="medium">
+          <span>🟡 Medium</span>
+        </button>
+        <button class="diff-tab" data-diff="expert">
+          <span>🔴 Expert Code</span>
+        </button>
+        <button class="diff-tab" data-diff="dynamic">
+          <span>⚡ Random 25</span>
+        </button>
+        <button class="diff-tab" data-diff="weak_keys">
+          <span>🎯 Weak Keys AI</span>
+        </button>
+      </div>
+
+      <div class="lesson-selector-dropdown">
+        <select id="lessonSelect" class="lesson-select" title="Select Curriculum Lesson">
+          <!-- Populated dynamically via JS -->
+        </select>
+      </div>
+    </div>
+
+    <!-- Live Performance HUD -->
+    <section class="metrics-hud" aria-label="Typing Metrics">
+      <div class="metric-card">
+        <div class="metric-label">
+          <span>Net Speed</span>
+          <span>⚡</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span id="liveWpmVal" class="metric-value">0</span>
+          <span class="metric-unit">WPM</span>
+        </div>
+        <div class="metric-sub">Standard 5-char words/min</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">
+          <span>Accuracy</span>
+          <span>🎯</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span id="liveAccVal" class="metric-value">100%</span>
+        </div>
+        <div class="metric-sub">Correct keystrokes ratio</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">
+          <span>Time Elapsed</span>
+          <span>⏱</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span id="liveTimeVal" class="metric-value">0.0s</span>
+        </div>
+        <div class="metric-sub">Active typing duration</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">
+          <span>Mistakes</span>
+          <span>❌</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span id="liveErrVal" class="metric-value">0</span>
+          <span class="metric-unit">err</span>
+        </div>
+        <div class="metric-sub">Uncorrected keystrokes</div>
+      </div>
+    </section>
+
+    <!-- Typing Stage -->
+    <main class="stage-wrapper" id="stageWrapper">
+      <div class="lesson-meta-info">
+        <div id="lessonMetaTitle" class="lesson-meta-title">
+          <span>Loading Curriculum...</span>
+        </div>
+        <div id="lessonMetaDesc" class="lesson-meta-desc"></div>
+      </div>
+
+      <!-- Character stream display -->
+      <div id="typingDisplay" class="typing-text-display" tabindex="0">
+        <!-- Animated Caret -->
+        <div id="caret" class="caret"></div>
+        <!-- Rendered character spans -->
+      </div>
+
+      <!-- Invisible input capture -->
+      <input type="text" id="hiddenInput" class="hidden-input" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus>
+
+      <!-- Stage Footer Controls -->
+      <div class="stage-footer">
+        <div class="hint-pill">
+          <span>Tip: Press</span>
+          <kbd>Tab</kbd>
+          <span>to restart &bull;</span>
+          <kbd>Esc</kbd>
+          <span>to cancel</span>
+        </div>
+
+        <button id="restartBtn" class="restart-btn" title="Restart Session (Tab)">
+          <span>↺ Restart</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Visual Mechanical Keyboard Section -->
+    <section id="keyboardSection" class="keyboard-container" aria-label="Mechanical Keyboard Visualizer">
+      <div class="keyboard-header">
+        <div class="keyboard-title">
+          <span>Interactive Mechanical Keyboard Guide</span>
+        </div>
+        <div class="finger-guide-legend">
+          <span><span class="finger-dot finger-left-pinky"></span>L.Pinky</span>
+          <span><span class="finger-dot finger-left-ring"></span>L.Ring</span>
+          <span><span class="finger-dot finger-left-middle"></span>L.Mid</span>
+          <span><span class="finger-dot finger-left-index"></span>L.Index</span>
+          <span><span class="finger-dot finger-right-index"></span>R.Index</span>
+          <span><span class="finger-dot finger-right-middle"></span>R.Mid</span>
+          <span><span class="finger-dot finger-right-ring"></span>R.Ring</span>
+          <span><span class="finger-dot finger-right-pinky"></span>R.Pinky</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Keyboard Keys Rows -->
+      <div id="keyboardContainer"></div>
+    </section>
+  </div>
+
+  <!-- Results Modal -->
+  <div id="resultsModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span>🏁 Session Complete!</span>
+        </h2>
+        <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      </div>
+
+      <div class="results-hero-grid">
+        <div class="results-wpm-box">
+          <div class="results-wpm-label">Net Typing Speed</div>
+          <div id="resultWpm" class="results-wpm-value">0</div>
+          <div class="metric-sub" style="margin-top:0.5rem; color:var(--text-dim);">Words Per Minute</div>
+        </div>
+
+        <div class="results-stats-col">
+          <div class="result-stat-pill">
+            <span class="result-stat-label">Raw Speed</span>
+            <span id="resultRawWpm" class="result-stat-val">0 WPM</span>
+          </div>
+          <div class="result-stat-pill">
+            <span class="result-stat-label">Accuracy</span>
+            <span id="resultAcc" class="result-stat-val">100%</span>
+          </div>
+          <div class="result-stat-pill">
+            <span class="result-stat-label">Time Taken</span>
+            <span id="resultTime" class="result-stat-val">0.0s</span>
+          </div>
+          <div class="result-stat-pill">
+            <span class="result-stat-label">Consistency</span>
+            <span id="resultConsistency" class="result-stat-val">100%</span>
+          </div>
+          <div class="result-stat-pill" style="grid-column: span 2;">
+            <span class="result-stat-label">Total Errors</span>
+            <span id="resultErrors" class="result-stat-val" style="color:var(--color-error);">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Velocity Graph Canvas -->
+      <div class="chart-container">
+        <div class="chart-title">
+          <span>Speed Over Time</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">Solid: Net WPM | Dashed: Raw WPM</span>
+        </div>
+        <canvas id="speedCanvas"></canvas>
+      </div>
+
+      <div class="results-actions">
+        <button id="resultsRepeatBtn" class="btn-secondary">
+          <span>↺ Try Again</span>
+        </button>
+        <button id="resultsNextBtn" class="btn-primary">
+          <span>Next Lesson →</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Text Modal -->
+  <div id="customTextModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span>📝 Custom Practice Drill</span>
+        </h2>
+        <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1rem;">
+        <div>
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text-dim);">Drill Title</label>
+          <input type="text" id="customTitleInput" placeholder="e.g. JavaScript Promise practice" style="width:100%; background:var(--bg-secondary); border:1px solid var(--bg-glass-border); padding:0.6rem 1rem; border-radius:var(--radius-md); color:#fff; font-family:var(--font-ui); outline:none;">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.4rem; color:var(--text-dim);">Paste Target Text or Code</label>
+          <textarea id="customTextInput" class="custom-textarea" placeholder="Paste any prose, article paragraph, or code snippet you want to practice..."></textarea>
+        </div>
+      </div>
+
+      <div class="results-actions">
+        <button class="modal-close-btn btn-secondary">Cancel</button>
+        <button id="saveCustomTextBtn" class="btn-primary">Start Custom Drill ⚡</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lifetime Statistics & Achievements Modal -->
+  <div id="statsModal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 860px;">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <span>🏆 Lifetime Statistics & Trophies</span>
+        </h2>
+        <button class="modal-close-btn" aria-label="Close Modal">&times;</button>
+      </div>
+
+      <!-- Quick Metrics Summary -->
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+        <div class="result-stat-pill">
+          <span class="result-stat-label">Personal Best</span>
+          <span id="statsLifetimeWpm" class="result-stat-val" style="color:#00f0ff;">0 WPM</span>
+        </div>
+        <div class="result-stat-pill">
+          <span class="result-stat-label">Average Speed</span>
+          <span id="statsAvgWpm" class="result-stat-val">0 WPM</span>
+        </div>
+        <div class="result-stat-pill">
+          <span class="result-stat-label">Average Accuracy</span>
+          <span id="statsAvgAcc" class="result-stat-val" style="color:#10b981;">100%</span>
+        </div>
+        <div class="result-stat-pill">
+          <span class="result-stat-label">Completed Sessions</span>
+          <span id="statsTestsTaken" class="result-stat-val">0</span>
+        </div>
+        <div class="result-stat-pill">
+          <span class="result-stat-label">Total Time Typing</span>
+          <span id="statsTimeTyping" class="result-stat-val">0 min</span>
+        </div>
+        <div class="result-stat-pill">
+          <span class="result-stat-label">Active Streak</span>
+          <span id="statsStreak" class="result-stat-val" style="color:#f59e0b;">1 day</span>
+        </div>
+      </div>
+
+      <!-- Achievements Showcase -->
+      <div>
+        <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:0.75rem; color:var(--text-highlight);">Achievements</h3>
+        <div id="achievementsContainer" class="achievements-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/audio.js"></script>
+  <script src="/js/keyboard.js"></script>
+  <script src="/js/lessons.js"></script>
+  <script src="/js/stats.js"></script>
+  <script src="/js/engine.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

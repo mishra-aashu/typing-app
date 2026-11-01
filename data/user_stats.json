@@ -1,0 +1,108 @@
+{
+  "total_sessions_completed": 2,
+  "total_time_seconds": 176.8,
+  "highest_wpm": 21.5,
+  "average_wpm": 21.5,
+  "average_accuracy": 78.6,
+  "streak_days": 1,
+  "last_active_date": "2026-11-01",
+  "completed_lesson_ids": [
+    "beg-06-common-words-100"
+  ],
+  "key_error_heatmap": {
+    "a": 4,
+    "u": 6,
+    " ": 6,
+    "t": 2,
+    "b": 2,
+    "o": 6,
+    "e": 2,
+    "f": 2,
+    "n": 2,
+    "y": 4
+  },
+  "achievements": [
+    {
+      "id": "first_test",
+      "title": "First Keystrokes",
+      "description": "Completed your first typing session.",
+      "icon": "⚡",
+      "unlocked": true,
+      "unlocked_at": "2026-11-01T08:48:20.969696800+00:00"
+    },
+    {
+      "id": "speed_40",
+      "title": "Rapid Flow (40 WPM)",
+      "description": "Surpassed 40 Words Per Minute with high accuracy.",
+      "icon": "🚀",
+      "unlocked": false,
+      "unlocked_at": null
+    },
+    {
+      "id": "speed_60",
+      "title": "Velocity Master (60 WPM)",
+      "description": "Crossed the 60 WPM threshold — touch typing pro.",
+      "icon": "🔥",
+      "unlocked": false,
+      "unlocked_at": null
+    },
+    {
+      "id": "speed_100",
+      "title": "Century Club (100 WPM)",
+      "description": "Lightning fingertips: reached triple-digit WPM!",
+      "icon": "👑",
+      "unlocked": false,
+      "unlocked_at": null
+    },
+    {
+      "id": "flawless_100",
+      "title": "Laser Precision (100%)",
+      "description": "Finished a complete lesson with 100% accuracy without errors.",
+      "icon": "🎯",
+      "unlocked": false,
+      "unlocked_at": null
+    },
+    {
+      "id": "expert_coder",
+      "title": "Silicon Scribe",
+      "description": "Conquered an Expert level programming language test.",
+      "icon": "💻",
+      "unlocked": false,
+      "unlocked_at": null
+    },
+    {
+      "id": "consistency_star",
+      "title": "Metronome Rhythm",
+      "description": "Achieved >95% typing cadence consistency.",
+      "icon": "🎵",
+      "unlocked": false,
+      "unlocked_at": null
+    }
+  ],
+  "recent_history": [
+    {
+      "id": "05422a5f-2c56-478c-8819-1d9f4ef2b593",
+      "lesson_id": "beg-06-common-words-100",
+      "lesson_title": "Top 50 Common Words",
+      "difficulty": "beginner",
+      "wpm": 21.5,
+      "raw_wpm": 27.3,
+      "accuracy": 78.6,
+      "consistency": 10.0,
+      "elapsed_seconds": 88.4,
+      "timestamp": "2026-11-01T08:48:22.581052657+00:00"
+    },
+    {
+      "id": "05422a5f-2c56-478c-8819-1d9f4ef2b593",
+      "lesson_id": "beg-06-common-words-100",
+      "lesson_title": "Top 50 Common Words",
+      "difficulty": "beginner",
+      "wpm": 21.5,
+      "raw_wpm": 27.3,
+      "accuracy": 78.6,
+      "consistency": 10.0,
+      "elapsed_seconds": 88.4,
+      "timestamp": "2026-11-01T08:48:20.969652576+00:00"
+    }
+  ]
+}
