@@ -146,7 +146,7 @@ pub fn get_advanced_lessons() -> Vec<LessonItem> {
         LessonItem {
             id: "adv-14-advanced-boss-test".to_string(),
             title: "Advanced Milestone Boss Test".to_string(),
-            description: "Surpass 85 WPM with 97.5% accuracy across prose and syntax to unlock Expert!",to_string(),
+            description: "Surpass 85 WPM with 97.5% accuracy across prose and syntax to unlock Expert!".to_string(),
             difficulty: "advanced".to_string(),
             category: "Phase 3 · Speed Conditioning".to_string(),
             target_text: "Through rigorous repetition and deliberate focus, muscle memory completely replaces conscious hesitation. At eighty-five words per minute, your fingers act as an instantaneous physical bridge between imagination and executable software.".to_string(),

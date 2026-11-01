@@ -85,7 +85,7 @@ pub fn get_medium_lessons() -> Vec<LessonItem> {
             description: "Shift-quote (\") and Shift-semicolon (:) in literary dialogue and structured notes.".to_string(),
             difficulty: "medium".to_string(),
             category: "Phase 2 · Punctuation".to_string(),
-            target_text: "\"Remember this rule: always strike keys with conviction,\" the coach whispered, \"never hesitate halfway.\"",
+            target_text: "\"Remember this rule: always strike keys with conviction,\" the coach whispered, \"never hesitate halfway.\"".to_string(),
             min_target_wpm: 50.0,
             min_accuracy: 96.0,
         },

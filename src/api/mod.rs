@@ -53,7 +53,9 @@ async fn health_check() -> impl IntoResponse {
 struct LessonsResponse {
     beginner: Vec<LessonItem>,
     medium: Vec<LessonItem>,
+    advanced: Vec<LessonItem>,
     expert: Vec<LessonItem>,
+    legend: Vec<LessonItem>,
     total_count: usize,
 }
 
@@ -61,13 +63,17 @@ async fn get_lessons() -> impl IntoResponse {
     let all = get_all_lessons();
     let beginner = all.iter().filter(|l| l.difficulty == "beginner").cloned().collect::<Vec<_>>();
     let medium = all.iter().filter(|l| l.difficulty == "medium").cloned().collect::<Vec<_>>();
+    let advanced = all.iter().filter(|l| l.difficulty == "advanced").cloned().collect::<Vec<_>>();
     let expert = all.iter().filter(|l| l.difficulty == "expert").cloned().collect::<Vec<_>>();
+    let legend = all.iter().filter(|l| l.difficulty == "legend").cloned().collect::<Vec<_>>();
 
     Json(LessonsResponse {
         total_count: all.len(),
         beginner,
         medium,
+        advanced,
         expert,
+        legend,
     })
 }
 
