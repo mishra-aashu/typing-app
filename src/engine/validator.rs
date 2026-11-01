@@ -101,6 +101,7 @@ impl TextValidator {
     }
 
     /// Count current incorrect characters
+    #[allow(dead_code)]
     pub fn incorrect_count(&self) -> usize {
         self.char_states
             .iter()
