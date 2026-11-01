@@ -19,19 +19,19 @@
       "last_completed_at": "2026-11-01T09:27:41.191247173+00:00"
     }
   },
-  "last_active_lesson_id": "beg-03-index-reach",
+  "last_active_lesson_id": "beg-01-home-row-1",
   "key_error_heatmap": {
-    "e": 2,
-    "n": 2,
-    "f": 1490,
-    "b": 2,
-    "j": 1532,
     "y": 4,
-    "u": 6,
     "t": 2,
+    "f": 1490,
+    "u": 6,
     "a": 4,
     "o": 6,
-    " ": 1130
+    " ": 1130,
+    "j": 1532,
+    "e": 2,
+    "n": 2,
+    "b": 2
   },
   "achievements": [
     {

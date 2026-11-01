@@ -121,6 +121,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       const diff = lessonMgr.currentDifficulty;
       const groups = lessonMgr.getLessonsGroupedByPhase(diff);
 
+      // Top Header inside menu
+      const menuTop = document.createElement('div');
+      menuTop.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:0.4rem 0.75rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.08); margin-bottom:0.4rem;';
+      menuTop.innerHTML = `
+        <span style="font-size:0.8rem; font-weight:700; color:#fff; text-transform:uppercase; letter-spacing:0.05em;">Select Stage</span>
+        <button id="pickerOpenModalBtn" type="button" style="background:transparent; border:none; color:var(--accent-primary); font-size:0.78rem; font-weight:700; cursor:pointer; padding:0.2rem 0.4rem;">View Full Map &rarr;</button>
+      `;
+      menuTop.querySelector('#pickerOpenModalBtn').addEventListener('click', e => {
+        e.stopPropagation();
+        closePickerMenu();
+        const currentTier = ['beginner', 'medium', 'advanced', 'expert', 'legend'].includes(lessonMgr.currentDifficulty)
+          ? lessonMgr.currentDifficulty
+          : 'beginner';
+        renderStagesModal(currentTier);
+        openModal(stagesModal);
+      });
+      lessonPickerMenu.appendChild(menuTop);
+
       Object.entries(groups).forEach(([phaseName, phaseLessons]) => {
         const headerEl = document.createElement('div');
         headerEl.className = 'picker-menu-phase-header';
