@@ -1,5 +1,6 @@
 /**
  * TypeForge - Master Application Controller
+ * Handles persistent progression, resume point, and smooth UX.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -58,19 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     liveErrVal.textContent = metrics.errorCount;
   });
 
-  // Handle session completion
-  engine.onComplete(async data => {
-    // Show results modal
-    showResultsModal(data);
-
-    // Refresh stats in background and apply updated heatmap to keyboard
-    const updatedStats = await statsMgr.fetchStats();
-    if (updatedStats && updatedStats.key_error_heatmap) {
-      keyboard.applyHeatmap(updatedStats.key_error_heatmap);
-    }
-  });
-
-  // Populate lesson dropdown helper
+  // Populate lesson dropdown with completion status
   function updateLessonDropdown() {
     lessonSelect.innerHTML = '';
     const diff = lessonMgr.currentDifficulty;
@@ -79,8 +68,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     lessons.forEach(l => {
       const opt = document.createElement('option');
       opt.value = l.id;
-      opt.textContent = `${l.title} (${l.category})`;
-      if (lessonMgr.activeLesson && lessonMgr.activeLesson.id === l.id) {
+      const isDone = lessonMgr.isLessonCompleted(l.id);
+      const prog = lessonMgr.getLessonProgress(l.id);
+      const isCurrent = lessonMgr.activeLesson && lessonMgr.activeLesson.id === l.id;
+
+      let badge = '';
+      if (isDone) {
+        badge = `[Passed: ${prog ? Math.round(prog.best_wpm) + ' WPM' : 'Done'}] `;
+      } else if (isCurrent) {
+        badge = '[Current] ';
+      }
+
+      opt.textContent = `${badge}${l.title} (${l.category})`;
+      if (isCurrent) {
         opt.selected = true;
       }
       lessonSelect.appendChild(opt);
@@ -90,10 +90,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Handle Lesson Change
   lessonMgr.onLessonChange(lesson => {
     if (!lesson) return;
-    lessonMetaTitle.innerHTML = `<span>${lesson.category}</span> — ${lesson.title}`;
+    const isDone = lessonMgr.isLessonCompleted(lesson.id);
+    const statusTag = isDone ? ' <span style="color:#10b981; font-size:0.8rem; margin-left:8px;">(Passed)</span>' : '';
+    
+    lessonMetaTitle.innerHTML = `<span>${lesson.category}</span> — ${lesson.title}${statusTag}`;
     lessonMetaDesc.textContent = lesson.description;
     updateLessonDropdown();
     engine.loadLesson(lesson);
+  });
+
+  // Handle session completion
+  engine.onComplete(async data => {
+    // Show results modal
+    showResultsModal(data);
+
+    // If passed minimum requirements (>85% accuracy), mark lesson completed
+    if (data.metrics.accuracy >= 85 && lessonMgr.activeLesson) {
+      lessonMgr.markLessonCompleted(lessonMgr.activeLesson.id, data.metrics);
+      updateLessonDropdown();
+    }
+
+    // Refresh stats in background and apply updated heatmap to keyboard
+    const updatedStats = await statsMgr.fetchStats();
+    if (updatedStats) {
+      lessonMgr.syncProgress(updatedStats);
+      if (updatedStats.key_error_heatmap) {
+        keyboard.applyHeatmap(updatedStats.key_error_heatmap);
+      }
+    }
   });
 
   // Difficulty Tabs click
@@ -207,13 +231,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     engine.reset();
   });
 
+  // Next Lesson button: advances to the next incomplete lesson
   document.getElementById('resultsNextBtn').addEventListener('click', () => {
     closeModal(resultsModal);
-    // Find next lesson
-    const list = lessonMgr.getLessonsForDifficulty(lessonMgr.currentDifficulty);
-    const currIdx = list.findIndex(l => l.id === lessonMgr.activeLesson?.id);
-    if (currIdx >= 0 && currIdx < list.length - 1) {
-      lessonMgr.selectLesson(list[currIdx + 1]);
+
+    // Auto-advance to the next incomplete lesson
+    const nextLesson = lessonMgr.findNextIncompleteLesson();
+    if (nextLesson && nextLesson.id !== lessonMgr.activeLesson?.id) {
+      // Sync active tab in UI
+      difficultyTabs.forEach(t => {
+        t.classList.toggle('active', t.dataset.diff === nextLesson.difficulty);
+      });
+      lessonMgr.selectLesson(nextLesson);
     } else {
       engine.reset();
     }
@@ -252,13 +281,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Initial Load
-  await lessonMgr.fetchLessons();
-  lessonMgr.setDifficulty('beginner');
+  // =========================================================================
+  // INITIALIZATION: Load catalog & resume from persistent uncompleted level
+  // =========================================================================
 
-  // Load and apply initial heatmap
+  // 1. Load full curriculum
+  await lessonMgr.fetchLessons();
+
+  // 2. Load user stats & progression history from backend
   const initialStats = await statsMgr.fetchStats();
-  if (initialStats && initialStats.key_error_heatmap) {
-    keyboard.applyHeatmap(initialStats.key_error_heatmap);
+  if (initialStats) {
+    lessonMgr.syncProgress(initialStats);
+    if (initialStats.key_error_heatmap) {
+      keyboard.applyHeatmap(initialStats.key_error_heatmap);
+    }
+  }
+
+  // 3. Automatically resume at the next incomplete lesson
+  const resumeLesson = lessonMgr.determineResumeLesson();
+  if (resumeLesson) {
+    difficultyTabs.forEach(t => {
+      t.classList.toggle('active', t.dataset.diff === resumeLesson.difficulty);
+    });
+    lessonMgr.selectLesson(resumeLesson);
+  } else {
+    lessonMgr.setDifficulty('beginner');
   }
 });

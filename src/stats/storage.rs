@@ -30,6 +30,16 @@ pub struct Achievement {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LessonProgress {
+    pub lesson_id: String,
+    pub completed: bool,
+    pub best_wpm: f64,
+    pub best_accuracy: f64,
+    pub times_completed: usize,
+    pub last_completed_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserStats {
     pub total_sessions_completed: usize,
     pub total_time_seconds: f64,
@@ -39,6 +49,10 @@ pub struct UserStats {
     pub streak_days: usize,
     pub last_active_date: Option<String>,
     pub completed_lesson_ids: Vec<String>,
+    #[serde(default)]
+    pub lesson_progress: HashMap<String, LessonProgress>,
+    #[serde(default)]
+    pub last_active_lesson_id: Option<String>,
     pub key_error_heatmap: HashMap<char, usize>,
     pub achievements: Vec<Achievement>,
     pub recent_history: Vec<TestResultRecord>,
@@ -55,6 +69,8 @@ impl Default for UserStats {
             streak_days: 1,
             last_active_date: Some(Utc::now().format("%Y-%m-%d").to_string()),
             completed_lesson_ids: Vec::new(),
+            lesson_progress: HashMap::new(),
+            last_active_lesson_id: None,
             key_error_heatmap: HashMap::new(),
             achievements: default_achievements(),
             recent_history: Vec::new(),
@@ -155,6 +171,15 @@ impl StatsStorage {
         lock.clone()
     }
 
+    pub fn set_last_active_lesson(&self, lesson_id: String) {
+        let mut lock = self.stats.lock().unwrap();
+        lock.last_active_lesson_id = Some(lesson_id);
+        let updated = lock.clone();
+        if let Ok(json) = serde_json::to_string_pretty(&updated) {
+            let _ = fs::write(&self.file_path, json);
+        }
+    }
+
     pub fn record_session(&self, record: TestResultRecord, weak_keys: HashMap<char, usize>) -> UserStats {
         let mut lock = self.stats.lock().unwrap();
         
@@ -173,9 +198,36 @@ impl StatsStorage {
         lock.average_accuracy = ((lock.average_accuracy * (count - 1.0)) + record.accuracy) / count;
         lock.average_accuracy = (lock.average_accuracy * 10.0).round() / 10.0;
 
-        if !lock.completed_lesson_ids.contains(&record.lesson_id) {
+        // Remember active lesson
+        lock.last_active_lesson_id = Some(record.lesson_id.clone());
+
+        // Update completed lesson list if passed minimum criteria (>85% accuracy)
+        if record.accuracy >= 85.0 && !lock.completed_lesson_ids.contains(&record.lesson_id) {
             lock.completed_lesson_ids.push(record.lesson_id.clone());
         }
+
+        // Track per-lesson detailed progress
+        let now_str = Utc::now().to_rfc3339();
+        let progress = lock.lesson_progress.entry(record.lesson_id.clone()).or_insert_with(|| LessonProgress {
+            lesson_id: record.lesson_id.clone(),
+            completed: record.accuracy >= 85.0,
+            best_wpm: record.wpm,
+            best_accuracy: record.accuracy,
+            times_completed: 0,
+            last_completed_at: Some(now_str.clone()),
+        });
+
+        if record.accuracy >= 85.0 {
+            progress.completed = true;
+        }
+        progress.times_completed += 1;
+        if record.wpm > progress.best_wpm {
+            progress.best_wpm = record.wpm;
+        }
+        if record.accuracy > progress.best_accuracy {
+            progress.best_accuracy = record.accuracy;
+        }
+        progress.last_completed_at = Some(now_str.clone());
 
         // Merge weak keys error heatmap
         for (k, err_count) in weak_keys {
@@ -183,7 +235,6 @@ impl StatsStorage {
         }
 
         // Check & unlock achievements
-        let now_str = Utc::now().to_rfc3339();
         for ach in &mut lock.achievements {
             if !ach.unlocked {
                 let should_unlock = match ach.id.as_str() {

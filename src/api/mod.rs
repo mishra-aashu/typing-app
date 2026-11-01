@@ -30,6 +30,7 @@ pub fn create_router(state: AppState) -> Router {
         .route("/session/finish", post(finish_session))
         .route("/stats", get(get_user_stats))
         .route("/stats/reset", post(reset_user_stats))
+        .route("/progress/active-lesson", post(set_active_lesson))
         .route("/dynamic-lesson", get(get_dynamic_lesson));
 
     Router::new()
@@ -246,4 +247,17 @@ async fn get_dynamic_lesson(
         let count = query.count.unwrap_or(25);
         Json(generate_random_words_lesson(count))
     }
+}
+
+#[derive(Deserialize)]
+struct SetActiveLessonRequest {
+    pub lesson_id: String,
+}
+
+async fn set_active_lesson(
+    State(state): State<AppState>,
+    Json(payload): Json<SetActiveLessonRequest>,
+) -> impl IntoResponse {
+    state.stats.set_last_active_lesson(payload.lesson_id);
+    StatusCode::OK
 }
