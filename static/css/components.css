@@ -537,8 +537,14 @@
   border-color: rgba(16, 185, 129, 0.35);
 }
 .stage-card.locked {
-  opacity: 0.55;
-  filter: grayscale(40%);
+  opacity: 1; /* 100% readable - no fading out */
+  filter: none;
+  background: rgba(22, 26, 42, 0.75);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.stage-card.locked:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  transform: translateY(-2px);
 }
 
 .stage-card-top {
@@ -548,15 +554,15 @@
   gap: 0.5rem;
 }
 .stage-card-title {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--text-highlight);
-  line-height: 1.3;
+  color: #ffffff !important;
+  line-height: 1.35;
 }
 .stage-card-desc {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  line-height: 1.4;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  line-height: 1.45;
 }
 
 .stage-meta-row {
@@ -564,56 +570,74 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
 }
 .target-wpm-chip {
-  color: var(--text-muted);
+  color: #cbd5e1;
   font-weight: 600;
+}
+.target-wpm-chip strong {
+  color: #fff;
 }
 .stage-status-chip {
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.65rem;
   border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
 }
 .stage-status-chip.passed {
-  background: rgba(16, 185, 129, 0.15);
-  color: #10b981;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
 }
 .stage-status-chip.locked {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-muted);
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
 }
 .stage-status-chip.unlocked {
-  background: rgba(121, 82, 255, 0.15);
-  color: #a78bfa;
+  background: rgba(121, 82, 255, 0.2);
+  border: 1px solid rgba(121, 82, 255, 0.45);
+  color: #c4b5fd;
 }
 
 .stage-play-btn {
   background: var(--bg-card);
   border: 1px solid var(--bg-glass-border);
   color: #fff;
-  padding: 0.45rem 0.85rem;
+  padding: 0.55rem 0.95rem;
   border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.45rem;
   transition: var(--transition-smooth);
   width: 100%;
 }
 .stage-play-btn:hover {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
+  box-shadow: 0 0 15px var(--accent-glow);
 }
-.stage-play-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none;
+.stage-play-btn.locked {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  cursor: pointer;
+}
+.stage-play-btn.locked:hover {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
 }
 
 /* Celebration Banner */

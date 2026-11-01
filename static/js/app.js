@@ -477,18 +477,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isDone) {
           statusBadgeHtml = `
             <span class="stage-status-chip passed">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:inline-block; vertical-align:middle; margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               Passed: ${Math.round(prog.best_wpm)} WPM
             </span>`;
         } else if (!isUnlocked) {
           statusBadgeHtml = `
             <span class="stage-status-chip locked">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:3px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               Locked
             </span>`;
         } else {
           statusBadgeHtml = `<span class="stage-status-chip unlocked">Ready</span>`;
         }
+
+        const buttonHtml = isCurrent
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>Current Stage</span>'
+          : isDone
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Practice Again</span>'
+          : isUnlocked
+          ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> <span>Start Stage</span>'
+          : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> <span>Locked &bull; Complete Previous</span>';
 
         card.innerHTML = `
           <div class="stage-card-top">
@@ -500,20 +508,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span class="target-wpm-chip">Target: <strong>${Math.round(l.min_target_wpm)} WPM</strong></span>
             <span class="target-wpm-chip">Accuracy: <strong>${Math.round(l.min_accuracy)}%</strong></span>
           </div>
-          <button class="stage-play-btn" ${!isUnlocked ? 'disabled' : ''}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <span>${isCurrent ? 'Current Stage' : isDone ? 'Replay Stage' : 'Start Stage'}</span>
+          <button class="stage-play-btn ${!isUnlocked ? 'locked' : ''}">
+            ${buttonHtml}
           </button>
         `;
 
         const playBtn = card.querySelector('.stage-play-btn');
         playBtn.addEventListener('click', () => {
-          // Switch main tabs
-          difficultyTabs.forEach(t => {
-            t.classList.toggle('active', t.dataset.diff === tier);
-          });
-          lessonMgr.selectLesson(l);
-          closeModal(stagesModal);
+          if (isUnlocked || isDone || lessonMgr.freePlayMode) {
+            difficultyTabs.forEach(t => {
+              t.classList.toggle('active', t.dataset.diff === tier);
+            });
+            lessonMgr.selectLesson(l);
+            closeModal(stagesModal);
+          } else {
+            showToast(`Pass the previous stage with 85%+ accuracy to unlock "${l.title}"!`);
+          }
         });
 
         cardsGrid.appendChild(card);
