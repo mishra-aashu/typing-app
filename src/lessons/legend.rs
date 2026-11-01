@@ -1,0 +1,66 @@
+use super::beginner::LessonItem;
+
+pub fn get_legend_lessons() -> Vec<LessonItem> {
+    vec![
+        LessonItem {
+            id: "leg-01-alternating-hands".to_string(),
+            title: "Hand Alternation Kinetic Flow".to_string(),
+            description: "Train words that strictly alternate between left and right hands for astronomical burst speeds.".to_string(),
+            difficulty: "legend".to_string(),
+            category: "Legend · Apex Mastery".to_string(),
+            target_text: "dismantled visual signals authentic panel formal suspend problem handle turn signal element visual toxic authentic".to_string(),
+            min_target_wpm: 110.0,
+            min_accuracy: 98.0,
+        },
+        LessonItem {
+            id: "leg-02-rolling-combos".to_string(),
+            title: "Rolling Finger Inward Glides".to_string(),
+            description: "Finger rolls where adjacent fingers cascade sequentially like a piano arpeggio.".to_string(),
+            difficulty: "legend".to_string(),
+            category: "Legend · Apex Mastery".to_string(),
+            target_text: "bright light straight weight tonight flight slight height stream street strike strong string station action relation section".to_string(),
+            min_target_wpm: 115.0,
+            min_accuracy: 98.5,
+        },
+        LessonItem {
+            id: "leg-03-velocity-paragraphs".to_string(),
+            title: "Elite Multitier Velocity Prose".to_string(),
+            description: "Dense, complex literary vocabulary demanding sustained triple-digit velocity.".to_string(),
+            difficulty: "legend".to_string(),
+            category: "Legend · Apex Mastery".to_string(),
+            target_text: "The philosophical inquiry into artificial intelligence mirrors humanity's eternal quest to comprehend consciousness itself, seeking balance between deterministic computation and the elusive spark of creative intuition.".to_string(),
+            min_target_wpm: 115.0,
+            min_accuracy: 98.5,
+        },
+        LessonItem {
+            id: "leg-04-programmer-poetry".to_string(),
+            title: "Programmer Poetry & Systems Cadence".to_string(),
+            description: "Seamless weaving of code syntax, mathematical notations, and technical commentary.".to_string(),
+            difficulty: "legend".to_string(),
+            category: "Legend · Apex Mastery".to_string(),
+            target_text: "for thread in workers.iter_mut() { thread.join().expect(\"thread panicked during parallel reduction\"); } assert_eq!(checksum.finalize(), EXPECTED_HASH);".to_string(),
+            min_target_wpm: 105.0,
+            min_accuracy: 98.5,
+        },
+        LessonItem {
+            id: "leg-05-the-gauntlet".to_string(),
+            title: "The Iron Gauntlet: Stamina Test".to_string(),
+            description: "An intense 200+ word gauntlet challenging your neuromuscular endurance and mental focus.".to_string(),
+            difficulty: "legend".to_string(),
+            category: "Legend · Apex Mastery".to_string(),
+            target_text: "High-performance athletes train their nervous systems to execute complex motor programs under intense physiological pressure. In the realm of digital input, master keyboardists achieve an identical state of unencumbered flow, converting abstract thoughts into permanent code with uncompromising speed and total fidelity.".to_string(),
+            min_target_wpm: 115.0,
+            min_accuracy: 98.5,
+        },
+        LessonItem {
+            id: "leg-06-grand-master".to_string(),
+            title: "Grand Master 120+ WPM Apex Test".to_string(),
+            description: "The pinnacle typing trial: 120 Words Per Minute with 99.0% pinpoint surgical accuracy!".to_string(),
+            difficulty: "legend".to_string(),
+            category: "Legend · Apex Mastery".to_string(),
+            target_text: "You have arrived at the absolute pinnacle of touch typing mastery. At over one hundred twenty words per minute with ninety-nine percent accuracy, your hands do not merely press keys: they conduct a symphony of thought, speed, and uncompromising digital excellence.".to_string(),
+            min_target_wpm: 120.0,
+            min_accuracy: 99.0,
+        },
+    ]
+}
